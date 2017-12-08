@@ -37,11 +37,15 @@ function do_command(msg, command, params = null){
       case 'exchange':
         exchange(msg, params)
         break;
-      default:
+      default:i
     }
   }catch(e){
     console.log(e)
   }
+}
+
+function core(msg, command) {
+
 }
 
 function exchange(msg, amount){

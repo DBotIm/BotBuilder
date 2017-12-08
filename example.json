@@ -1,0 +1,19 @@
+{
+  "command": "salam",
+  "event_type": "callback",
+  "replies": [
+    {
+      "type": "message",
+      "text": "Message core is awesome",
+      "inline_keyboard":[
+        [
+          {"text": "salam", "action" : {"callback": "salam"}},
+          {"text": "start", "action" : {"callback": "start"}}
+        ],
+        [
+          {"text": "start", "action" : {"callback": "start"}}
+        ]
+      ]
+    }
+    ]
+}
