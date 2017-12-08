@@ -24,9 +24,13 @@ bot.on(/^\/exchange (.+)$/, (msg, props) => {
   return;
 });
 
+bot.on('/salam', msg => {
+  return do_command(msg, "salam");
+})
 
 function do_command(msg, command, params = null){
   try{
+    console.log(command)
     switch (command) {
       case 'start':
         start(msg);
@@ -37,7 +41,8 @@ function do_command(msg, command, params = null){
       case 'exchange':
         exchange(msg, params)
         break;
-      default:i
+      default:
+        core(msg, command)
     }
   }catch(e){
     console.log(e)
@@ -45,8 +50,59 @@ function do_command(msg, command, params = null){
 }
 
 function core(msg, command) {
+  MongoClient.connect(url, function(err, db) {
+    try{
+      if (err) throw err;
+      db.collection('messages').findOne({'command': command}, function(err, result) {
+        try{
+          if (err) throw err;
 
+          console.log(result)
+
+          if(result == null) return;
+
+          var replies = result.replies;
+
+          for(var i = 0; i < replies.length; i++) {
+            reply = replies[i];
+            if(reply.type = "message") {
+              var inline_keyboard = reply.inline_keyboard;
+              if(inline_keyboard != null) {
+                var keyboard_tmp = [];
+
+                for(var j = 0; j < inline_keyboard.length; j++) {
+                  var row_tmp = [];
+
+                  var row = inline_keyboard[j];
+                  for(var k = 0; k < row.length; k++) {
+                    var button = row[k]
+                    row_tmp.push(bot.inlineButton(button.text, button.action))
+                  }
+                  keyboard_tmp.push(row_tmp)
+                }
+
+                var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+                bot.sendMessage(msg.from.id, reply.text, {replyMarkup})
+              } else {
+                bot.sendMessage(msg.from.id, reply.text)
+              }
+            }
+          }
+
+          db.close();
+        }catch(e){
+          console.log(e)
+        }
+      });
+    }catch(e){
+      console.log(e)
+    }
+  });
 }
+
+bot.on('callbackQuery', msg => {
+  do_command(msg, msg.data)
+})
 
 function exchange(msg, amount){
   var tooman = amount * 1500;
