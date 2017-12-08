@@ -1,3 +1,4 @@
+// text message
 {
   "command": "salam",
   "event_type": "callback",
@@ -9,6 +10,28 @@
         [
           {"text": "salam", "action" : {"callback": "salam"}},
           {"text": "start", "action" : {"callback": "start"}}
+        ],
+        [
+          {"text": "start", "action" : {"callback": "start"}}
+        ]
+      ]
+    }
+    ]
+}
+
+//  image message
+{
+  "command": "image",
+  "event_type": "callback",
+  "replies": [
+    {
+      "type": "photo",
+      "caption": "Message core is awesome",
+      "path": "pic.jpg",
+      "inline_keyboard":[
+        [
+          {"text": "salam", "action" : {"callback": "salam"}},
+          {"text": "image", "action" : {"callback": "image"}}
         ],
         [
           {"text": "start", "action" : {"callback": "start"}}

@@ -28,6 +28,22 @@ bot.on('/salam', msg => {
   return do_command(msg, "salam");
 })
 
+bot.on('/image', msg => {
+  return do_command(msg, "image");
+})
+
+bot.on('/audio', msg => {
+  return do_command(msg, "audio");
+})
+
+bot.on('/video', msg => {
+  return do_command(msg, "video");
+})
+
+bot.on('/document', msg => {
+  return do_command(msg, "document");
+})
+
 function do_command(msg, command, params = null){
   try{
     console.log(command)
@@ -65,27 +81,24 @@ function core(msg, command) {
 
           for(var i = 0; i < replies.length; i++) {
             reply = replies[i];
-            if(reply.type = "message") {
-              var inline_keyboard = reply.inline_keyboard;
-              if(inline_keyboard != null) {
-                var keyboard_tmp = [];
+            switch (reply.type) {
+              case "message":
+                send_text_message(msg, reply)
+                break;
+              case "photo":
+                send_photo_message(msg, reply)
+                break;
+              case "audio":
+                send_audio_message(msg, reply)
+                break;
+              case "document":
+                send_document_message(msg, reply)
+                break;
+              case "video":
+                send_video_message(msg, reply)
+                break;
+              default:
 
-                for(var j = 0; j < inline_keyboard.length; j++) {
-                  var row_tmp = [];
-
-                  var row = inline_keyboard[j];
-                  for(var k = 0; k < row.length; k++) {
-                    var button = row[k]
-                    row_tmp.push(bot.inlineButton(button.text, button.action))
-                  }
-                  keyboard_tmp.push(row_tmp)
-                }
-
-                var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
-                bot.sendMessage(msg.from.id, reply.text, {replyMarkup})
-              } else {
-                bot.sendMessage(msg.from.id, reply.text)
-              }
             }
           }
 
@@ -98,6 +111,125 @@ function core(msg, command) {
       console.log(e)
     }
   });
+}
+
+function send_text_message(msg, reply){
+  var inline_keyboard = reply.inline_keyboard;
+  if(inline_keyboard != null) {
+    var keyboard_tmp = [];
+
+    for(var j = 0; j < inline_keyboard.length; j++) {
+      var row_tmp = [];
+
+      var row = inline_keyboard[j];
+      for(var k = 0; k < row.length; k++) {
+        var button = row[k]
+        row_tmp.push(bot.inlineButton(button.text, button.action))
+      }
+      keyboard_tmp.push(row_tmp)
+    }
+
+    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    bot.sendMessage(msg.from.id, reply.text, {replyMarkup})
+  } else {
+    bot.sendMessage(msg.from.id, reply.text)
+  }
+}
+
+function send_photo_message(msg, reply){
+  var inline_keyboard = reply.inline_keyboard;
+  if(inline_keyboard != null) {
+    var keyboard_tmp = [];
+
+    for(var j = 0; j < inline_keyboard.length; j++) {
+      var row_tmp = [];
+
+      var row = inline_keyboard[j];
+      for(var k = 0; k < row.length; k++) {
+        var button = row[k]
+        row_tmp.push(bot.inlineButton(button.text, button.action))
+      }
+      keyboard_tmp.push(row_tmp)
+    }
+
+    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    var caption = reply.caption
+    bot.sendPhoto(msg.from.id, reply.path, {caption: reply.caption, replyMarkup: replyMarkup})
+  } else {
+    bot.sendPhoto(msg.from.id, reply.path, {caption: reply.caption})
+  }
+}
+
+function send_audio_message(msg, reply){
+  var inline_keyboard = reply.inline_keyboard;
+  if(inline_keyboard != null) {
+    var keyboard_tmp = [];
+
+    for(var j = 0; j < inline_keyboard.length; j++) {
+      var row_tmp = [];
+
+      var row = inline_keyboard[j];
+      for(var k = 0; k < row.length; k++) {
+        var button = row[k]
+        row_tmp.push(bot.inlineButton(button.text, button.action))
+      }
+      keyboard_tmp.push(row_tmp)
+    }
+
+    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    var caption = reply.caption
+    bot.sendAudio(msg.from.id, reply.path, {caption: reply.caption, replyMarkup: replyMarkup})
+  } else {
+    bot.sendAudio(msg.from.id, reply.path, {caption: reply.caption})
+  }
+}
+
+function send_document_message(msg, reply){
+  var inline_keyboard = reply.inline_keyboard;
+  if(inline_keyboard != null) {
+    var keyboard_tmp = [];
+
+    for(var j = 0; j < inline_keyboard.length; j++) {
+      var row_tmp = [];
+
+      var row = inline_keyboard[j];
+      for(var k = 0; k < row.length; k++) {
+        var button = row[k]
+        row_tmp.push(bot.inlineButton(button.text, button.action))
+      }
+      keyboard_tmp.push(row_tmp)
+    }
+
+    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    var caption = reply.caption
+    bot.sendDocument(msg.from.id, reply.path, {caption: reply.caption, replyMarkup: replyMarkup})
+  } else {
+    bot.sendDocument(msg.from.id, reply.path, {caption: reply.caption})
+  }
+}
+
+function send_video_message(msg, reply){
+  var inline_keyboard = reply.inline_keyboard;
+  if(inline_keyboard != null) {
+    var keyboard_tmp = [];
+
+    for(var j = 0; j < inline_keyboard.length; j++) {
+      var row_tmp = [];
+
+      var row = inline_keyboard[j];
+      for(var k = 0; k < row.length; k++) {
+        var button = row[k]
+        row_tmp.push(bot.inlineButton(button.text, button.action))
+      }
+      keyboard_tmp.push(row_tmp)
+    }
+
+    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    var caption = reply.caption
+    bot.sendVideo(msg.from.id, reply.path, {caption: reply.caption, replyMarkup: replyMarkup})
+  } else {
+    bot.sendVideo(msg.from.id, reply.path, {caption: reply.caption})
+  }
 }
 
 bot.on('callbackQuery', msg => {
