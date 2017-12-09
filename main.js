@@ -4,6 +4,8 @@ const bot = new TeleBot('493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4');
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://localhost:27017/test_shop";
 
+var nodeEval = require('node-eval')
+
 bot.on('/start', msg => {
   return do_command(msg, 'start');
 })
@@ -19,7 +21,7 @@ bot.on(/^\/exchange (.+)$/, (msg, props) => {
   if(isNaN(amount)){
     bot.sendMessage(msg.from.id, 'جلوی /exchange میزان لیر را وارد کنید', { replyToMessage: msg.message_id });
   }else{
-    return do_command(msg, 'exchange', amount)
+    return do_command(msg, 'exchange_it', amount)
   }
   return;
 });
@@ -44,6 +46,10 @@ bot.on('/document', msg => {
   return do_command(msg, "document");
 })
 
+bot.on('/eval', msg => {
+  return do_command(msg, "eval_it");
+})
+
 function do_command(msg, command, params = null){
   try{
     console.log(command)
@@ -58,14 +64,18 @@ function do_command(msg, command, params = null){
         exchange(msg, params)
         break;
       default:
-        core(msg, command)
+        core(msg, command , params)
     }
   }catch(e){
     console.log(e)
   }
 }
 
-function core(msg, command) {
+function get_vars() {
+  return evalVars;
+}
+
+function core(msg, command, params = null) {
   MongoClient.connect(url, function(err, db) {
     try{
       if (err) throw err;
@@ -77,7 +87,22 @@ function core(msg, command) {
 
           if(result == null) return;
 
+          if(result.event_type == "eval") {
+
+            this.bot = bot;
+            this.MongoClient = MongoClient;
+            this.url = url;
+
+            this.msg = msg;
+            this.command = command;
+            this.params = params;
+
+            nodeEval(result.code)
+          }
+
           var replies = result.replies;
+
+          if(replies == undefined) return;
 
           for(var i = 0; i < replies.length; i++) {
             reply = replies[i];
