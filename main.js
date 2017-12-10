@@ -2,7 +2,7 @@ const TeleBot = require('telebot');
 const bot = new TeleBot('493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4');
 
 var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/test_shop";
+var url = "mongodb://localhost:27017/pozhi_shop";
 
 var nodeEval = require('node-eval')
 
@@ -21,7 +21,7 @@ bot.on(/^\/exchange (.+)$/, (msg, props) => {
   if(isNaN(amount)){
     bot.sendMessage(msg.from.id, 'جلوی /exchange میزان لیر را وارد کنید', { replyToMessage: msg.message_id });
   }else{
-    return do_command(msg, 'exchange_it', amount)
+    return do_command(msg, 'exchange', amount)
   }
   return;
 });
@@ -59,9 +59,6 @@ function do_command(msg, command, params = null){
         break;
       case 'exit':
         exit(msg);
-        break;
-      case 'exchange':
-        exchange(msg, params)
         break;
       default:
         core(msg, command , params)
