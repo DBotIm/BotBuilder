@@ -26,30 +26,6 @@ bot.on(/^\/exchange (.+)$/, (msg, props) => {
   return;
 });
 
-bot.on('/salam', msg => {
-  return do_command(msg, "salam");
-})
-
-bot.on('/image', msg => {
-  return do_command(msg, "image");
-})
-
-bot.on('/audio', msg => {
-  return do_command(msg, "audio");
-})
-
-bot.on('/video', msg => {
-  return do_command(msg, "video");
-})
-
-bot.on('/document', msg => {
-  return do_command(msg, "document");
-})
-
-bot.on('/eval', msg => {
-  return do_command(msg, "eval_it");
-})
-
 function do_command(msg, command, params = null){
   try{
     console.log(command)
@@ -333,7 +309,7 @@ function make_user(user){
         let replyMarkup = bot.inlineKeyboard([
          [
            bot.inlineButton('راهنمای خرید', {callback: 'buying_help'}),
-           bot.inlineButton('لیست سایت ها', {callback: 'site_list'}),
+           bot.inlineButton('لیست سایت ها', {callback: 'sites_list'}),
          ],[
            bot.inlineButton('شروع', {callback: 'start'}),
            bot.inlineButton('خروج از بات', {callback: 'exit'}),
@@ -378,7 +354,7 @@ function change_news_status(user, status){
         let replyMarkup = bot.inlineKeyboard([
          [
            bot.inlineButton('راهنمای خرید', {callback: 'buying_help'}),
-           bot.inlineButton('لیست سایت ها', {callback: 'site_list'}),
+           bot.inlineButton('لیست سایت ها', {callback: 'sites_list'}),
          ],[
            bot.inlineButton('شروع', {callback: 'start'}),
            bot.inlineButton('خروج از بات', {callback: 'exit'}),

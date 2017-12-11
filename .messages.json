@@ -1,0 +1,24 @@
+// sites list
+{
+  "command": "sites_list",
+  "event_type": "callback",
+  "replies": [
+    {
+      "type": "message",
+      "text": "text",
+      "inline_keyboard":[
+        [
+          {"text": "راهنمای خرید", "action" : {"callback": "buying_help"}},
+          {"text": "لیست سایت ها", "action" : {"callback": "sites_list"}}
+        ],
+        [
+          {"text": "شروع", "action" : {"callback": "start"}},
+          {"text": "خروج از بات", "action" : {"callback": "exit"}}
+        ],
+        [
+          {"text": "ارتباط با ما", "action" : {"callback": "contact_us"}}
+        ]
+      ]
+    }
+    ]
+}
