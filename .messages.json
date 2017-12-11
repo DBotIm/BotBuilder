@@ -22,3 +22,68 @@
     }
     ]
 }
+
+// buying help
+{
+  "command": "buying_help",
+  "event_type": "callback",
+  "replies": [
+    {
+      "type": "message",
+      "text": "text",
+      "inline_keyboard":[
+        [
+          {"text": "راهنما در مورد سایت ها", "action" : {"callback": "help_site"}},
+          {"text": "نحوه ارسال لینک", "action" : {"callback": "how_send_link"}}
+        ],
+        [
+          {"text": "شرایط کلی", "action" : {"callback": "general_condition"}},
+          {"text": "نحوه محاسبه قیمت", "action" : {"callback": "how_calculate"}}
+        ],
+        [
+          {"text": "راهنمای بات", "action" : {"callback": "bot_help"}},
+          {"text": "نحوه واریز وجه", "action" : {"callback": "how_pay"}}
+        ],
+        [
+          {"text": "منوی اصلی", "action" : {"callback": "main_menu"}},
+          {"text": "ترجمه لغات مورد نیاز", "action" : {"callback": "words_translate"}}
+        ]
+      ]
+    }
+    ]
+}
+
+
+// template
+// buying help
+{
+  "command": "buying_help",
+  "event_type": "callback",
+  "replies": [
+    {
+      "type": "message",
+      "text": "text",
+      "inline_keyboard":[
+        [
+          {"text": "", "action" : {"callback": "help_site"}},
+          {"text": "", "action" : {"callback": "how_send_link"}}
+        ],
+        [
+          {"text": "", "action" : {"callback": "help_site"}},
+          {"text": "", "action" : {"callback": "how_send_link"}}
+        ],
+        [
+          {"text": "", "action" : {"callback": "help_site"}},
+          {"text": "", "action" : {"callback": "how_send_link"}}
+        ],
+        [
+          {"text": "", "action" : {"callback": "start"}},
+          {"text": "", "action" : {"callback": "exit"}}
+        ],
+        [
+          {"text": "", "action" : {"callback": "contact_us"}}
+        ]
+      ]
+    }
+    ]
+}
