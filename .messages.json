@@ -277,6 +277,26 @@
     ]
 }
 
+// contact us
+{
+  "command": "contact_us",
+  "event_type": "callback",
+  "replies": [
+    {
+      "type": "photo",
+      "text": "zarinpal.jpg",
+      "inline_keyboard":[
+        [
+          {"text": "ارسال پیام به ما" ,"action" : {"url": "https://t.me/samanfekri"}}
+        ],
+        [
+          {"text": "منوی اصلی", "action" : {"callback": "main_menu"}}
+        ]
+      ]
+    }
+    ]
+}
+
 
 // template
 // buying help
