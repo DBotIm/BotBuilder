@@ -234,6 +234,27 @@
     ]
 }
 
+// how pay
+{
+  "command": "how_pay",
+  "event_type": "callback",
+  "replies": [
+    {
+      "type": "message",
+      "text": "text",
+      "inline_keyboard":[
+        [
+          {"text": "راهنمای بات", "action" : {"callback": "bot_help"}},
+          {"text": "درگاه پرداخت" ,"action" : {"callbacl": "zarin_pal_pay"}}
+        ],
+        [
+          {"text": "منوی اصلی", "action" : {"callback": "main_menu"}}
+        ]
+      ]
+    }
+    ]
+}
+
 
 // template
 // buying help
