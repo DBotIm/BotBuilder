@@ -1,2 +1,7 @@
-# ShopBot
-A shop bot in telegram with Node.js
+# BotBuilder
+A telegram bot framework (easiest way to make a bot in telegram)
+
+## Usage
+```bash
+npm install
+```
