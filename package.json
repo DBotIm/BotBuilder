@@ -1,0 +1,24 @@
+{
+  "name": "shopbot",
+  "version": "1.0.0",
+  "description": "A market for selling clothes with telegram bot address in telegram [t.me/Robitabot](https://t.me/Robitabot) [@RobitaBot](https://t.me/Robitabot)",
+  "main": "robita_shop.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SamanFekri/ShopBot.git"
+  },
+  "author": "saman fekri",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SamanFekri/ShopBot/issues"
+  },
+  "homepage": "https://github.com/SamanFekri/ShopBot#readme",
+  "dependencies": {
+    "mongodb": "^2.2.33",
+    "node-eval": "^2.0.0",
+    "telebot": "^1.2.3"
+  }
+}
