@@ -1,5 +1,5 @@
 const TeleBot = require('telebot');
-const bot = new TeleBot('493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4');
+const bot = new TeleBot('496483127:AAGTZuX4ptm5wi-gI--2BCFVpECHveQHGk0');
 
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://localhost:27017/pozhi_shop";
