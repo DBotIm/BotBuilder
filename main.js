@@ -2,7 +2,7 @@ const TeleBot = require('telebot');
 const bot = new TeleBot('493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4');
 
 var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/pozhi_shop";
+var url = "mongodb://localhost:27017/itest";
 
 var nodeEval = require('node-eval')
 
@@ -243,7 +243,7 @@ function exit(msg){
   MongoClient.connect(url, function(err, db) {
     try{
       if (err) throw err;
-      db.collection('customers').findOne({'_id': msg.from.id}, function(err, user) {
+      db.collection('users').findOne({'_id': msg.from.id}, function(err, user) {
         try{
           if (err) throw err;
           if (user != null){
@@ -268,7 +268,7 @@ function start(msg){
         console.log(error)
         return
       }
-      db.collection('customers').findOne({'_id': msg.from.id}, function(err, user) {
+      db.collection('users').findOne({'_id': msg.from.id}, function(err, user) {
         try{
           if (err){
             console.log(error)
@@ -301,7 +301,7 @@ function make_user(user){
       user.get_news = true;
       user._id = user.id;
       user.role = 'user'
-      db.collection('customers').insertOne(user, function(err, result) {
+      db.collection('users').insertOne(user, function(err, result) {
         if (err){
           console.log(error)
           return;
@@ -346,7 +346,7 @@ function change_news_status(user, status){
       user.get_news = status;
       user._id = user.id;
 
-      db.collection('customers').updateOne({'_id': user._id}, user, function(err, result) {
+      db.collection('users').updateOne({'_id': user._id}, user, function(err, result) {
         if (err){
           console.log(error)
           return;
