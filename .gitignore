@@ -61,3 +61,4 @@ typings/
 .DS_STORE/
 /.DS_STORE
 
+backup_dbs/
