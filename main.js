@@ -2,7 +2,9 @@ const TeleBot = require('telebot');
 const bot = new TeleBot('493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4');
 
 var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/itest";
+const assert = require('assert');
+var url = "mongodb://localhost:27017";
+const dbName = "itest";
 
 var nodeEval = require('node-eval')
 
@@ -49,12 +51,11 @@ function get_vars() {
 }
 
 function core(msg, command, params = null) {
-  MongoClient.connect(url, function(err, db) {
-    try{
-      if (err) throw err;
+  MongoClient.connect(url, function(err, client) {
+      assert.equal(null, err);
+      const db = client.db(dbName)
       db.collection('messages').findOne({'command': command}, function(err, result) {
-        try{
-          if (err) throw err;
+          assert.equal(null, err);
 
           console.log(result)
 
@@ -100,14 +101,8 @@ function core(msg, command, params = null) {
             }
           }
 
-          db.close();
-        }catch(e){
-          console.log(e)
-        }
+          client.close();
       });
-    }catch(e){
-      console.log(e)
-    }
   });
 }
 
@@ -240,9 +235,9 @@ function exchange(msg, amount){
 }
 
 function exit(msg){
-  MongoClient.connect(url, function(err, db) {
-    try{
-      if (err) throw err;
+  MongoClient.connect(url, function(err, client) {
+    assert.equal(null, err);
+    const db = client.db(dbName)
       db.collection('users').findOne({'_id': msg.from.id}, function(err, user) {
         try{
           if (err) throw err;
@@ -250,89 +245,90 @@ function exit(msg){
             change_news_status(user, false)
           }
           console.log(user);
-          db.close();
+          client.close();
         }catch(e){
           console.log(e)
         }
       });
-    }catch(e){
-      console.log(e)
-    }
   });
 }
 
 function start(msg){
-  MongoClient.connect(url, function(err, db) {
-    try{
-      if (err){
-        console.log(error)
-        return
+  MongoClient.connect(url, function(err, client) {
+    assert.equal(null, err);
+    const db = client.db(dbName);
+
+    find_one_user(msg, db, function(result){
+      if(result != null){
+        client.close()
+      } else {
+        insert_user(msg.from, db, function(res){
+          client.close()
+        })
       }
-      db.collection('users').findOne({'_id': msg.from.id}, function(err, user) {
-        try{
-          if (err){
-            console.log(error)
-            return;
-          }
-          if (user != null){
-            change_news_status(user, true)
-          }else{
-            make_user(msg.from)
-          }
-          console.log(user);
-          db.close();
-        }catch(e){
-          console.log(e)
-        }
-      });
-    }catch(e){
-      console.log(e)
-    }
+      do_command(msg, 'yes')
+    });
   });
 }
 
-function make_user(user){
-  MongoClient.connect(url, function(err, db) {
-    try{
-      if (err){
-        console.log(error)
-        return;
-      }
-      user.get_news = true;
-      user._id = user.id;
-      user.role = 'user'
-      db.collection('users').insertOne(user, function(err, result) {
-        if (err){
-          console.log(error)
-          return;
-        }
-        let replyMarkup = bot.inlineKeyboard([
-         [
-           bot.inlineButton('راهنمای خرید', {callback: 'buying_help'}),
-           bot.inlineButton('لیست سایت ها', {callback: 'sites_list'}),
-         ],[
-           bot.inlineButton('شروع', {callback: 'start'}),
-           bot.inlineButton('خروج از بات', {callback: 'exit'}),
-         ], [
-           bot.inlineButton('ارتباط با ما', {callback: 'contact_us'})
-         ]
-         ]);
-        let ret_val = 'دوست عزیز ما ' + user.first_name + ' خوش آمدید'
-        bot.sendMessage(user.id, ret_val, {replyMarkup})
-      });
-    }catch(e){
-      console.log(e)
-    }
+function find_one_user(msg, db, callback) {
+  const collection = db.collection('users');
+  collection.findOne({'_id': msg.from.id}, function(err, docs) {
+    assert.equal(err, null);
+    callback(docs)
   });
 }
+
+function insert_user(user, db, callback){
+  const collection = db.collection('users')
+  user.get_news = true
+  user._id = user.id
+  delete user.id
+  user.role = 'user'
+  user.state = 'start'
+  collection.insertOne(user,function (err, result) {
+    assert.equal(err, null);
+    callback(result);
+  });
+}
+
+// function make_user(user){
+//   MongoClient.connect(url, function(err, db) {
+//     try{
+//       if (err){
+//         console.log(error)
+//         return;
+//       }
+//       user.get_news = true;
+//       user._id = user.id;
+//       user.role = 'user'
+//       db.collection('users').insertOne(user, function(err, result) {
+//         if (err){
+//           console.log(error)
+//           return;
+//         }
+//         let replyMarkup = bot.inlineKeyboard([
+//          [
+//            bot.inlineButton('راهنمای خرید', {callback: 'buying_help'}),
+//            bot.inlineButton('لیست سایت ها', {callback: 'sites_list'}),
+//          ],[
+//            bot.inlineButton('شروع', {callback: 'start'}),
+//            bot.inlineButton('خروج از بات', {callback: 'exit'}),
+//          ], [
+//            bot.inlineButton('ارتباط با ما', {callback: 'contact_us'})
+//          ]
+//          ]);
+//         let ret_val = 'دوست عزیز ما ' + user.first_name + ' خوش آمدید'
+//         bot.sendMessage(user.id, ret_val, {replyMarkup})
+//       });
+//     }catch(e){
+//       console.log(e)
+//     }
+//   });
+// }
 function change_news_status(user, status){
-  MongoClient.connect(url, function(err, db) {
-    try{
-      if (err){
-        console.log(error)
-        return;
-      }
-
+  MongoClient.connect(url, function(err, client) {
+        assert.equal(null, err);
       var ret_val = '';
       if(status){
         if(user.get_news){
@@ -346,6 +342,7 @@ function change_news_status(user, status){
       user.get_news = status;
       user._id = user.id;
 
+      const db = client.db(dbName)
       db.collection('users').updateOne({'_id': user._id}, user, function(err, result) {
         if (err){
           console.log(error)
@@ -362,13 +359,8 @@ function change_news_status(user, status){
            bot.inlineButton('ارتباط با ما', {callback: 'contact_us'})
          ]
          ]);
-
-
         bot.sendMessage(user.id, ret_val, {replyMarkup})
       });
-    }catch(e){
-      console.log(e)
-    }
   });
 }
 bot.start();
