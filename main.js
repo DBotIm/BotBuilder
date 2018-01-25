@@ -1,110 +1,142 @@
 const TeleBot = require('telebot');
 const bot = new TeleBot('493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4');
 
-var MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
-var url = "mongodb://localhost:27017";
-const dbName = "itest";
+// node eval
+const nodeEval = require('node-eval');
 
-var nodeEval = require('node-eval')
+// connect to mongodb by mongoose
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/itest');
 
-bot.on('/start', msg => {
-  return do_command(msg, 'start');
-})
+const UserSchema = mongoose.Schema({
+  _id: String
+}, { strict: false });
+const User = mongoose.model('User', UserSchema);
 
-bot.on('/exit', msg => {
-  return do_command(msg, 'exit');
-})
+const MessageSchema = mongoose.Schema({
+  command: String,
+  event_type: String,
+  replies: Array,
+  code: String,
+}, { strict: false });
+const Message = mongoose.model('Message', MessageSchema);
 
-bot.on(/^\/exchange (.+)$/, (msg, props) => {
-  console.log(props);
-  var amount = props.match[1];
-  amount = parseFloat(amount)
-  if(isNaN(amount)){
-    bot.sendMessage(msg.from.id, 'جلوی /exchange میزان لیر را وارد کنید', { replyToMessage: msg.message_id });
-  }else{
-    return do_command(msg, 'exchange', amount)
+// Listen for any kind of message. There are different kinds of
+// messages.
+bot.on('text', (msg) => {
+  const chatId = msg.chat.id;
+
+  User.findOne({_id: msg.from.id}, function(err, user){
+      try{
+        if(!err) {
+          if(!user) {
+            user = msg.from;
+            user._id = user.id;
+            user.state = 'new';
+            user.role = 'normal';
+
+            delete user.id;
+
+            let cur_user = new User(user);
+            cur_user.save().then();
+          }
+        }
+    }catch(e) {
+
+    }
+  });
+
+  console.log(msg);
+
+  if(msg.text.charAt(0) == '/'){
+    let b_i = msg.text.indexOf(' ');
+    let a_i = msg.text.indexOf('@');
+    let delimiter = ' ';
+
+    if(a_i > 0 && a_i < b_i || b_i < 0) {
+      delimiter = '@'
+    }
+
+    parts = msg.text.split(delimiter);
+    console.log(parts)
+
+    if(parts.length > 1) {
+      core(msg, parts[0], parts.slice(1));
+    } else {
+      core(msg, parts[0]);
+    }
   }
-  return;
 });
 
-function do_command(msg, command, params = null){
-  try{
-    console.log(command)
-    switch (command) {
-      case 'start':
-        start(msg);
-        break;
-      case 'exit':
-        exit(msg);
-        break;
-      default:
-        core(msg, command , params)
-    }
-  }catch(e){
-    console.log(e)
-  }
-}
-
-function get_vars() {
-  return evalVars;
-}
 
 function core(msg, command, params = null) {
-  MongoClient.connect(url, function(err, client) {
-      assert.equal(null, err);
-      const db = client.db(dbName)
-      db.collection('messages').findOne({'command': command}, function(err, result) {
-          assert.equal(null, err);
+  Message.findOne({'command': command}, function(err, result) {
+    try{
+      if(!err) {
+        if(result == null) return;
 
-          console.log(result)
-
-          if(result == null) return;
-
-          if(result.event_type == "eval") {
-
-            this.bot = bot;
-            this.MongoClient = MongoClient;
-            this.url = url;
-
-            this.msg = msg;
-            this.command = command;
-            this.params = params;
-
-            nodeEval(result.code)
+        if(result.event_type == "eval") {
+          const context = {
+            mongoose: mongoose,
+            bot: bot,
+            msg: msg,
+            command: command,
+            params: params
           }
 
-          var replies = result.replies;
+          let run_code = 'try{\
+                          module.exports = mongoose;\n\
+                          module.exports = bot;\n\
+                          module.exports = msg;\n\
+                          module.exports = command;\n\
+                          module.exports = params;\n';
+          run_code += result.code;
+          run_code += '\n} catch(e) {\nconsole.log(e);\n}'
+          console.log(run_code)
+          console.log('your code running:');
+          console.log('--------------------------------');
+          nodeEval(run_code,'' ,context);
+          console.log('------------------your code ends');
+        }
 
-          if(replies == undefined) return;
+        var replies = result.replies;
 
-          for(var i = 0; i < replies.length; i++) {
-            reply = replies[i];
-            switch (reply.type) {
-              case "message":
-                send_text_message(msg, reply)
-                break;
-              case "photo":
-                send_photo_message(msg, reply)
-                break;
-              case "audio":
-                send_audio_message(msg, reply)
-                break;
-              case "document":
-                send_document_message(msg, reply)
-                break;
-              case "video":
-                send_video_message(msg, reply)
-                break;
-              default:
+        console.log(replies)
 
-            }
+        if(replies == undefined) return;
+
+        for(var i = 0; i < replies.length; i++) {
+          reply = replies[i];
+          switch (reply.type) {
+            case "message":
+              send_text_message(msg, reply)
+              break;
+            case "photo":
+              send_photo_message(msg, reply)
+              break;
+            case "audio":
+              send_audio_message(msg, reply)
+              break;
+            case "document":
+              send_document_message(msg, reply)
+              break;
+            case "video":
+              send_video_message(msg, reply)
+              break;
+            default:
+
           }
+        }
 
-          client.close();
-      });
+      }
+  } catch(e) {
+    console.log();
+    console.log(e);
+  }
   });
+
 }
+
 
 function send_text_message(msg, reply){
   var inline_keyboard = reply.inline_keyboard;
@@ -226,141 +258,7 @@ function send_video_message(msg, reply){
 }
 
 bot.on('callbackQuery', msg => {
-  do_command(msg, msg.data)
+  core(msg, msg.data)
 })
 
-function exchange(msg, amount){
-  var tooman = amount * 1500;
-  bot.sendMessage(msg.from.id, 'تبدیل لیر به تومان :' + ' ' + tooman, { replyToMessage: msg.message_id });
-}
-
-function exit(msg){
-  MongoClient.connect(url, function(err, client) {
-    assert.equal(null, err);
-    const db = client.db(dbName)
-      db.collection('users').findOne({'_id': msg.from.id}, function(err, user) {
-        try{
-          if (err) throw err;
-          if (user != null){
-            change_news_status(user, false)
-          }
-          console.log(user);
-          client.close();
-        }catch(e){
-          console.log(e)
-        }
-      });
-  });
-}
-
-function start(msg){
-  MongoClient.connect(url, function(err, client) {
-    assert.equal(null, err);
-    const db = client.db(dbName);
-
-    find_one_user(msg, db, function(result){
-      if(result != null){
-        client.close()
-      } else {
-        insert_user(msg.from, db, function(res){
-          client.close()
-        })
-      }
-      do_command(msg, 'yes')
-    });
-  });
-}
-
-function find_one_user(msg, db, callback) {
-  const collection = db.collection('users');
-  collection.findOne({'_id': msg.from.id}, function(err, docs) {
-    assert.equal(err, null);
-    callback(docs)
-  });
-}
-
-function insert_user(user, db, callback){
-  const collection = db.collection('users')
-  user.get_news = true
-  user._id = user.id
-  delete user.id
-  user.role = 'user'
-  user.state = 'start'
-  collection.insertOne(user,function (err, result) {
-    assert.equal(err, null);
-    callback(result);
-  });
-}
-
-// function make_user(user){
-//   MongoClient.connect(url, function(err, db) {
-//     try{
-//       if (err){
-//         console.log(error)
-//         return;
-//       }
-//       user.get_news = true;
-//       user._id = user.id;
-//       user.role = 'user'
-//       db.collection('users').insertOne(user, function(err, result) {
-//         if (err){
-//           console.log(error)
-//           return;
-//         }
-//         let replyMarkup = bot.inlineKeyboard([
-//          [
-//            bot.inlineButton('راهنمای خرید', {callback: 'buying_help'}),
-//            bot.inlineButton('لیست سایت ها', {callback: 'sites_list'}),
-//          ],[
-//            bot.inlineButton('شروع', {callback: 'start'}),
-//            bot.inlineButton('خروج از بات', {callback: 'exit'}),
-//          ], [
-//            bot.inlineButton('ارتباط با ما', {callback: 'contact_us'})
-//          ]
-//          ]);
-//         let ret_val = 'دوست عزیز ما ' + user.first_name + ' خوش آمدید'
-//         bot.sendMessage(user.id, ret_val, {replyMarkup})
-//       });
-//     }catch(e){
-//       console.log(e)
-//     }
-//   });
-// }
-function change_news_status(user, status){
-  MongoClient.connect(url, function(err, client) {
-        assert.equal(null, err);
-      var ret_val = '';
-      if(status){
-        if(user.get_news){
-          ret_val = 'شما قبلا در بات عضو شده اید'
-        }else{
-          ret_val = 'عضویت شما دوباره فعال شد. برای لغو عضویت /exit را وارد نمایید'
-        }
-      }else{
-        ret_val = 'عضویت شما در بات لغو شد. برای فعال سازی عضویت /start را وارد نمایید'
-      }
-      user.get_news = status;
-      user._id = user.id;
-
-      const db = client.db(dbName)
-      db.collection('users').updateOne({'_id': user._id}, user, function(err, result) {
-        if (err){
-          console.log(error)
-          return;
-        }
-        let replyMarkup = bot.inlineKeyboard([
-         [
-           bot.inlineButton('راهنمای خرید', {callback: 'buying_help'}),
-           bot.inlineButton('لیست سایت ها', {callback: 'sites_list'}),
-         ],[
-           bot.inlineButton('شروع', {callback: 'start'}),
-           bot.inlineButton('خروج از بات', {callback: 'exit'}),
-         ], [
-           bot.inlineButton('ارتباط با ما', {callback: 'contact_us'})
-         ]
-         ]);
-        bot.sendMessage(user.id, ret_val, {replyMarkup})
-      });
-  });
-}
 bot.start();

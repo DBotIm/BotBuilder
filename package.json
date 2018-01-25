@@ -1,25 +1,16 @@
 {
-  "name": "bot_builder",
-  "version": "0.8.0",
-  "description": "A telegram bot builder",
+  "name": "botbuilder",
+  "version": "1.5.0",
+  "description": "new BotBuilder",
   "main": "main.js",
-  "dependencies": {
-    "mongodb": "^3.0.1",
-    "node-eval": "^2.0.0",
-    "telebot": "^1.2.3"
-  },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SamanFekri/ShopBot.git"
-  },
   "author": "SKings",
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/SamanFekri/ShopBot/issues"
-  },
-  "homepage": "https://github.com/SamanFekri/ShopBot#readme"
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^5.0.1",
+    "node-eval": "^2.0.0",
+    "telebot": "^1.2.3"
+  }
 }
