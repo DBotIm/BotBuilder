@@ -86,13 +86,13 @@ bot.on('text', (msg) => {
 
 function command_core(msg, command, params = null) {
   Message.findOne({'command': command}, function(err, result) {
-    core(msg, null, command, params = null, err, result);
+    core(msg, null, command, params, err, result);
   });
 }
 
 function state_core(msg, state, params = null) {
   Message.findOne({'trigger_state': state}, function(err, result) {
-    core(msg, state, null, params = null, err, result);
+    core(msg, state, null, params, err, result);
   });
 }
 
@@ -100,6 +100,10 @@ function core(msg, state, command = null, params = null, err, result){
   try{
     if(!err) {
       if(result == null) return;
+
+      console.log('params');
+      console.log(params);
+      console.log();
 
       command = result.command;
       if(result.event_type == "eval") {
