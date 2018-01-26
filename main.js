@@ -9,7 +9,9 @@ const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/itest');
 
 const UserSchema = mongoose.Schema({
-  _id: String
+  _id: String,
+  state: String,
+  role: String,
 }, { strict: false });
 const User = mongoose.model('User', UserSchema);
 
@@ -18,6 +20,7 @@ const MessageSchema = mongoose.Schema({
   event_type: String,
   replies: Array,
   code: String,
+  trigger_state: String,
 }, { strict: false });
 const Message = mongoose.model('Message', MessageSchema);
 
@@ -42,7 +45,8 @@ bot.on('text', (msg) => {
           }
         }
     }catch(e) {
-
+      console.log('Adding person:')
+      console.log(e);
     }
   });
 
@@ -61,80 +65,102 @@ bot.on('text', (msg) => {
     console.log(parts)
 
     if(parts.length > 1) {
-      core(msg, parts[0], parts.slice(1));
+      command_core(msg, parts[0], parts.slice(1));
     } else {
-      core(msg, parts[0]);
+      command_core(msg, parts[0]);
     }
+  } else {
+    User.findOne({_id: msg.from.id}, function(err, user){
+        try{
+          if(!err) {
+            let params = [{type: 'text', text:msg.text}];
+            state_core(msg, user.state, params)
+          }
+      }catch(e) {
+
+      }
+    });
   }
 });
 
 
-function core(msg, command, params = null) {
+function command_core(msg, command, params = null) {
   Message.findOne({'command': command}, function(err, result) {
-    try{
-      if(!err) {
-        if(result == null) return;
-
-        if(result.event_type == "eval") {
-          const context = {
-            mongoose: mongoose,
-            bot: bot,
-            msg: msg,
-            command: command,
-            params: params
-          }
-
-          let run_code = 'try{\
-                          module.exports = mongoose;\n\
-                          module.exports = bot;\n\
-                          module.exports = msg;\n\
-                          module.exports = command;\n\
-                          module.exports = params;\n';
-          run_code += result.code;
-          run_code += '\n} catch(e) {\nconsole.log(e);\n}'
-          console.log(run_code)
-          console.log('your code running:');
-          console.log('--------------------------------');
-          nodeEval(run_code,'' ,context);
-          console.log('------------------your code ends');
-        }
-
-        var replies = result.replies;
-
-        console.log(replies)
-
-        if(replies == undefined) return;
-
-        for(var i = 0; i < replies.length; i++) {
-          reply = replies[i];
-          switch (reply.type) {
-            case "message":
-              send_text_message(msg, reply)
-              break;
-            case "photo":
-              send_photo_message(msg, reply)
-              break;
-            case "audio":
-              send_audio_message(msg, reply)
-              break;
-            case "document":
-              send_document_message(msg, reply)
-              break;
-            case "video":
-              send_video_message(msg, reply)
-              break;
-            default:
-
-          }
-        }
-
-      }
-  } catch(e) {
-    console.log();
-    console.log(e);
-  }
+    core(msg, null, command, params = null, err, result);
   });
+}
 
+function state_core(msg, state, params = null) {
+  Message.findOne({'trigger_state': state}, function(err, result) {
+    core(msg, state, null, params = null, err, result);
+  });
+}
+
+function core(msg, state, command = null, params = null, err, result){
+  try{
+    if(!err) {
+      if(result == null) return;
+
+      command = result.command;
+      if(result.event_type == "eval") {
+        const context = {
+          mongoose: mongoose,
+          bot: bot,
+          msg: msg,
+          command: command,
+          state: state,
+          params: params
+        }
+
+        let run_code = 'try{\
+                        module.exports = mongoose;\n\
+                        module.exports = bot;\n\
+                        module.exports = msg;\n\
+                        module.exports = command;\n\
+                        module.exports = params;\n';
+        run_code += result.code;
+        run_code += '\n} catch(e) {\nconsole.log(e);\n}'
+        console.log(run_code)
+        console.log('your code running:');
+        console.log('--------------------------------');
+        nodeEval(run_code,'' ,context);
+        console.log('------------------your code ends');
+      }
+
+      var replies = result.replies;
+
+      console.log(replies)
+
+      if(replies == undefined) return;
+
+      for(var i = 0; i < replies.length; i++) {
+        reply = replies[i];
+        switch (reply.type) {
+          case "message":
+            send_text_message(msg, reply)
+            break;
+          case "photo":
+            send_photo_message(msg, reply)
+            break;
+          case "audio":
+            send_audio_message(msg, reply)
+            break;
+          case "document":
+            send_document_message(msg, reply)
+            break;
+          case "video":
+            send_video_message(msg, reply)
+            break;
+          default:
+
+        }
+      }
+
+    }
+} catch(e) {
+  console.log();
+  console.log(e);
+}
 }
 
 
