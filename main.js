@@ -45,7 +45,7 @@ bot.on('text', (msg) => {
           }
         }
     }catch(e) {
-      console.log('Adding person:')
+      console.log('Adding person:');
       console.log(e);
     }
   });
@@ -113,7 +113,9 @@ function core(msg, state, command = null, params = null, err, result){
           msg: msg,
           command: command,
           state: state,
-          params: params
+          params: params,
+          User: User,
+          Message: Message
         }
 
         let run_code = 'try{\
@@ -121,7 +123,10 @@ function core(msg, state, command = null, params = null, err, result){
                         module.exports = bot;\n\
                         module.exports = msg;\n\
                         module.exports = command;\n\
-                        module.exports = params;\n';
+                        module.exports = state;\n\
+                        module.exports = params;\n\
+                        module.exports = User;\n\
+                        module.exports = Message;\n';
         run_code += result.code;
         run_code += '\n} catch(e) {\nconsole.log(e);\n}'
         console.log(run_code)
