@@ -12,6 +12,11 @@ const UserSchema = mongoose.Schema({
   _id: String,
   state: String,
   role: String,
+  first_name: String,
+  last_name: String,
+  username: String,
+  is_bot: Boolean,
+  language_code: String,
 }, { strict: false });
 const User = mongoose.model('User', UserSchema);
 
@@ -29,26 +34,7 @@ const Message = mongoose.model('Message', MessageSchema);
 bot.on('text', (msg) => {
   const chatId = msg.chat.id;
 
-  User.findOne({_id: msg.from.id}, function(err, user){
-      try{
-        if(!err) {
-          if(!user) {
-            user = msg.from;
-            user._id = user.id;
-            user.state = 'new';
-            user.role = 'normal';
-
-            delete user.id;
-
-            let cur_user = new User(user);
-            cur_user.save().then();
-          }
-        }
-    }catch(e) {
-      console.log('Adding person:');
-      console.log(e);
-    }
-  });
+  update_user(msg);
 
   console.log(msg);
 
@@ -70,19 +56,93 @@ bot.on('text', (msg) => {
       command_core(msg, parts[0]);
     }
   } else {
-    User.findOne({_id: msg.from.id}, function(err, user){
-        try{
-          if(!err) {
-            let params = [{type: 'text', text:msg.text}];
-            state_core(msg, user.state, params)
-          }
-      }catch(e) {
-
-      }
-    });
+    state_job(msg, 'text')
   }
 });
 
+bot.on('photo', (msg) => {
+  update_user(msg);
+  state_job(msg, 'photo');
+});
+
+bot.on('video', (msg) => {
+  update_user(msg);
+  state_job(msg, 'video');
+});
+
+bot.on('document', (msg) => {
+  update_user(msg);
+  state_job(msg, 'document');
+});
+
+bot.on('audio', (msg) => {
+  update_user(msg);
+  state_job(msg, 'audio');
+});
+
+function state_job(msg, msg_type) {
+  User.findOne({_id: msg.from.id}, function(err, user){
+      try{
+        if(!err) {
+          let params = {type: msg_type};
+          switch (msg_type) {
+            case 'text':
+                params.text = msg.text;
+              break;
+            case 'photo':
+                params.photo = msg.photo;
+              break;
+            case 'video':
+                params.video = msg.video;
+              break;
+            case 'audio':
+                params.audio = msg.audio;
+              break
+            case 'document':
+                params.document = msg.document;
+              break;
+            default:
+
+          }
+          if('caption' in msg){
+            params.caption = msg.caption;
+          }
+          console.log(params);
+          state_core(msg, user.state, params)
+        }
+    }catch(e) {
+
+    }
+  });
+}
+
+function update_user(msg) {
+  User.findOne({_id: msg.from.id}, function(err, user){
+      try{
+        if(!err) {
+          if(!user) {
+            user = msg.from;
+            user._id = user.id;
+            user.state = 'new';
+            user.role = 'normal';
+
+            delete user.id;
+          } else {
+            for(var key in msg.from) {
+              if(key != 'id'){
+                user[key] = msg.from[key];
+              }
+            }
+          }
+          let cur_user = new User(user);
+          cur_user.save().then();
+        }
+    }catch(e) {
+      console.log('Adding person:');
+      console.log(e);
+    }
+  });
+}
 
 function command_core(msg, command, params = null) {
   Message.findOne({'command': command}, function(err, result) {
