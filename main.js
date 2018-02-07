@@ -353,7 +353,24 @@ function send_video_message(msg, reply){
 }
 
 bot.on('callbackQuery', msg => {
-  core(msg, msg.data)
+
+  let b_i = msg.data.indexOf(' ');
+  let a_i = msg.data.indexOf('@');
+  let delimiter = ' ';
+
+  if(a_i > 0 && a_i < b_i || b_i < 0) {
+    delimiter = '@'
+  }
+
+  parts = msg.text.split(delimiter);
+  console.log(parts)
+
+  if(parts.length > 1) {
+    command_core(msg, parts[0], parts.slice(1));
+  } else {
+    command_core(msg, parts[0]);
+  }
+  // core(msg, msg.data)
 })
 
 bot.start();
