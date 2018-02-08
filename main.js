@@ -362,7 +362,7 @@ bot.on('callbackQuery', msg => {
     delimiter = '@'
   }
 
-  parts = msg.text.split(delimiter);
+  parts = msg.data.split(delimiter);
   console.log(parts)
 
   if(parts.length > 1) {
