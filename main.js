@@ -17,7 +17,7 @@ const UserSchema = mongoose.Schema({
   username: String,
   is_bot: Boolean,
   language_code: String,
-  more: {}, 
+  extra: {}, 
 }, { strict: false });
 const User = mongoose.model('User', UserSchema);
 
