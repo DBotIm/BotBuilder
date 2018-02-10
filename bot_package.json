@@ -1,0 +1,21 @@
+{
+  "name": "botbuilder",
+  "version": "1.5.0",
+  "description": "new BotBuilder",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SKings",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^5.0.1",
+    "node-eval": "^2.0.0",
+    "telebot": "^1.2.3"
+  },
+  "bot_token": "493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4",
+  "db_url": "mongodb://localhost/",
+  "db_name": "itest",
+  "extar_codes": [],
+  "output": "output"
+}

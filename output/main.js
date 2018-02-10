@@ -1,12 +1,12 @@
 const TeleBot = require('telebot');
-const bot = new TeleBot(@@bot_token@@);
+const bot = new TeleBot('493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4');
 
 // node eval
 const nodeEval = require('node-eval');
 
 // connect to mongodb by mongoose
 const mongoose = require('mongoose');
-var db_url = @@db_url@@ + @@db_name@@;
+var db_url = 'mongodb://localhost/' + 'itest';
 mongoose.connect(db_url);
 
 const UserSchema = mongoose.Schema({
