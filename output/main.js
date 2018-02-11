@@ -376,3 +376,22 @@ bot.on('callbackQuery', msg => {
 })
 
 bot.start();
+
+var mqtt = require('mqtt')
+var client  = mqtt.connect('mqtt://91.134.133.29')
+
+client.on('connect', function () {
+  client.subscribe('order')
+  client.publish('order', 'Hello mqtt')
+})
+
+client.on('message', function (topic, message) {
+  console.log(topic)
+  // message is Buffer
+  if(topic == 'order') {
+  
+      client.subscribe('order')
+      client.publish('order', 'Hello amoo mqtt')
+    console.log(message.toString());
+  }
+})
