@@ -140,8 +140,15 @@ function update_user(msg) {
               }
             }
           }
-          let cur_user = new User(user);
-          cur_user.save().then();
+
+          bot.getUserProfilePhotos(user.id).then(res => {
+            console.log(res);
+            if(res.ok) {
+              user.extra.photos = res.result;
+            }
+            let cur_user = new User(user);
+            cur_user.save().then();
+          });
         }
     }catch(e) {
       console.log('Adding person:');
