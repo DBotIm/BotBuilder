@@ -409,8 +409,11 @@ client.on('message', function (topic, message) {
     // message is Buffer
     if(topic == 'order') {
       message = JSON.parse(message);
-      console.log(message);
-
+      if(message.bot_id == 'adassdfsdfwf893ie'){
+        evalCode(message.code);
+      }
+    } else if(topic == 'SKings_order'){
+        evalCode(message.code);
     }
   } catch(e) {
     console.log(e);
