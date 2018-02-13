@@ -140,14 +140,26 @@ function update_user(msg) {
               }
             }
           }
+          if(user.extra == undefined) {
+            user.extra = {photos: {}}
+          }
+          let cur_user = new User(user);
+          cur_user.save().then();
 
-          bot.getUserProfilePhotos(user.id).then(res => {
+          bot.getUserProfilePhotos(user.id).then(function(res) {
             console.log(res);
             if(res.ok) {
               user.extra.photos = res.result;
+              for(var i = 0; i < user.extra.photos.photos.length; i++){
+                let pic_url = 'https://api.telegram.org/file/bot'
+                + '493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4'
+                + '/' + user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_path;
+                user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].url = pic_url;
+              }
+              let cur_user = new User(user);
+              cur_user.save().then();
             }
-            let cur_user = new User(user);
-            cur_user.save().then();
+
           });
         }
     }catch(e) {
