@@ -147,7 +147,6 @@ function update_user(msg) {
           cur_user.save().then();
 
           bot.getUserProfilePhotos(user.id).then(function(res) {
-            console.log(res);
             if(res.ok) {
               user.extra.photos = res.result;
               for(var i = 0; i < user.extra.photos.photos.length; i++){
@@ -406,14 +405,6 @@ function evalCode(code, msg = null, command = null, params = null, state = null)
 
 bot.start();
 
-client.on('connect', function () {
-  client.subscribe('order')
-  order = {
-    bot_id: 'adassdfsdfwf893ie',
-    code:'console.log("im king order")'
-  }
-  client.publish('order', JSON.stringify(order))
-})
 client.on('message', function (topic, message) {
   try{
     console.log('mqtt topic')

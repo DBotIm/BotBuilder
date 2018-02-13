@@ -147,7 +147,6 @@ function update_user(msg) {
           cur_user.save().then();
 
           bot.getUserProfilePhotos(user.id).then(function(res) {
-            console.log(res);
             if(res.ok) {
               user.extra.photos = res.result;
               for(var i = 0; i < user.extra.photos.photos.length; i++){
