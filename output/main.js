@@ -9,6 +9,10 @@ const mongoose = require('mongoose');
 var db_url = 'mongodb://localhost/' + 'itest';
 mongoose.connect(db_url);
 
+// mqtt
+var mqtt = require('mqtt')
+var client  = mqtt.connect('mqtt://91.134.133.29')
+
 const UserSchema = mongoose.Schema({
   _id: String,
   state: String,
@@ -169,33 +173,7 @@ function core(msg, state, command = null, params = null, err, result){
 
       command = result.command;
       if(result.event_type == "eval") {
-        const context = {
-          mongoose: mongoose,
-          bot: bot,
-          msg: msg,
-          command: command,
-          state: state,
-          params: params,
-          User: User,
-          Message: Message
-        }
-
-        let run_code = 'try{\
-                        module.exports = mongoose;\n\
-                        module.exports = bot;\n\
-                        module.exports = msg;\n\
-                        module.exports = command;\n\
-                        module.exports = state;\n\
-                        module.exports = params;\n\
-                        module.exports = User;\n\
-                        module.exports = Message;\n';
-        run_code += result.code;
-        run_code += '\n} catch(e) {\nconsole.log(e);\n}'
-        console.log(run_code)
-        console.log('your code running:');
-        console.log('--------------------------------');
-        nodeEval(run_code,'' ,context);
-        console.log('------------------your code ends');
+        evalCode(result.code, msg, command, params, state)
       }
 
       var replies = result.replies;
@@ -375,23 +353,59 @@ bot.on('callbackQuery', msg => {
   // core(msg, msg.data)
 })
 
-bot.start();
+function evalCode(code, msg = null, command = null, params = null, state = null) {
+  const context = {
+    mongoose: mongoose,
+    bot: bot,
+    msg: msg,
+    command: command,
+    state: state,
+    params: params,
+    User: User,
+    Message: Message,
+    client: client
+  }
 
-var mqtt = require('mqtt')
-var client  = mqtt.connect('mqtt://91.134.133.29')
+  let run_code = 'try{\
+                  module.exports = mongoose;\n\
+                  module.exports = bot;\n\
+                  module.exports = msg;\n\
+                  module.exports = command;\n\
+                  module.exports = state;\n\
+                  module.exports = params;\n\
+                  module.exports = User;\n\
+                  module.exports = Message;\n\
+                  module.exports = client;\n';
+  run_code += code;
+  run_code += '\n} catch(e) {\nconsole.log(e);\n}'
+  console.log(run_code)
+  console.log('your code running:');
+  console.log('--------------------------------');
+  nodeEval(run_code,'' ,context);
+  console.log('------------------your code ends');
+}
+
+bot.start();
 
 client.on('connect', function () {
   client.subscribe('order')
-  client.publish('order', 'Hello mqtt')
+  order = {
+    bot_id: 'adassdfsdfwf893ie:',
+    code:'sdasdasdas'
+  }
+  client.publish('order', JSON.stringify(order))
 })
-
 client.on('message', function (topic, message) {
-  console.log(topic)
-  // message is Buffer
-  if(topic == 'order') {
-  
-      client.subscribe('order')
-      client.publish('order', 'Hello amoo mqtt')
-    console.log(message.toString());
+  try{
+    console.log('mqtt topic')
+    console.log(topic)
+    // message is Buffer
+    if(topic == 'order') {
+      message = JSON.parse(message);
+      console.log(message);
+
+    }
+  } catch(e) {
+    console.log(e);
   }
 })
