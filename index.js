@@ -14,7 +14,7 @@ for (let i = 0; i < keys.length; i++) {
   console.log('adding config ' + keys[i]);
   let temp = '@@'+keys[i]+'@@';
   let regex = new RegExp(temp, 'g');
-  rawdata = rawdata.replace(regex, "'"+configs[keys[i]]+"'");
+  rawdata = rawdata.replace(regex, "'" + configs[keys[i]] + "'");
 }
 
 if(fs.existsSync(configs.output)) {

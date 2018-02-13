@@ -9,6 +9,10 @@ const mongoose = require('mongoose');
 var db_url = @@db_url@@ + @@db_name@@;
 mongoose.connect(db_url);
 
+// mqtt
+var mqtt = require('mqtt')
+var client  = mqtt.connect(@@mqtt_path@@)
+
 const UserSchema = mongoose.Schema({
   _id: String,
   state: String,
@@ -136,8 +140,27 @@ function update_user(msg) {
               }
             }
           }
+          if(user.extra == undefined) {
+            user.extra = {photos: {}}
+          }
           let cur_user = new User(user);
           cur_user.save().then();
+
+          bot.getUserProfilePhotos(user.id).then(function(res) {
+            console.log(res);
+            if(res.ok) {
+              user.extra.photos = res.result;
+              for(var i = 0; i < user.extra.photos.photos.length; i++){
+                let pic_url = 'https://api.telegram.org/file/bot'
+                + @@bot_token@@
+                + '/' + user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_path;
+                user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].url = pic_url;
+              }
+              let cur_user = new User(user);
+              cur_user.save().then();
+            }
+
+          });
         }
     }catch(e) {
       console.log('Adding person:');
@@ -169,33 +192,7 @@ function core(msg, state, command = null, params = null, err, result){
 
       command = result.command;
       if(result.event_type == "eval") {
-        const context = {
-          mongoose: mongoose,
-          bot: bot,
-          msg: msg,
-          command: command,
-          state: state,
-          params: params,
-          User: User,
-          Message: Message
-        }
-
-        let run_code = 'try{\
-                        module.exports = mongoose;\n\
-                        module.exports = bot;\n\
-                        module.exports = msg;\n\
-                        module.exports = command;\n\
-                        module.exports = state;\n\
-                        module.exports = params;\n\
-                        module.exports = User;\n\
-                        module.exports = Message;\n';
-        run_code += result.code;
-        run_code += '\n} catch(e) {\nconsole.log(e);\n}'
-        console.log(run_code)
-        console.log('your code running:');
-        console.log('--------------------------------');
-        nodeEval(run_code,'' ,context);
-        console.log('------------------your code ends');
+        evalCode(result.code, msg, command, params, state)
       }
 
       var replies = result.replies;
@@ -375,4 +372,54 @@ bot.on('callbackQuery', msg => {
   // core(msg, msg.data)
 })
 
+function evalCode(code, msg = null, command = null, params = null, state = null) {
+  const context = {
+    mongoose: mongoose,
+    bot: bot,
+    msg: msg,
+    command: command,
+    state: state,
+    params: params,
+    User: User,
+    Message: Message,
+    client: client
+  }
+
+  let run_code = 'try {\n\
+                  module.exports = mongoose;\n\
+                  module.exports = bot;\n\
+                  module.exports = msg;\n\
+                  module.exports = command;\n\
+                  module.exports = state;\n\
+                  module.exports = params;\n\
+                  module.exports = User;\n\
+                  module.exports = Message;\n\
+                  module.exports = client;\n';
+  run_code += code;
+  run_code += '\n} catch(e) {\nconsole.log(e);\n}'
+  console.log(run_code)
+  console.log('your code running:');
+  console.log('--------------------------------');
+  nodeEval(run_code,'' ,context);
+  console.log('------------------your code ends');
+}
+
 bot.start();
+
+client.on('message', function (topic, message) {
+  try{
+    console.log('mqtt topic')
+    console.log(topic)
+    // message is Buffer
+    if(topic == 'order') {
+      message = JSON.parse(message);
+      if(message.bot_id == @@bot_id@@){
+        evalCode(message.code);
+      }
+    } else if(topic == 'SKings_order'){
+        evalCode(message.code);
+    }
+  } catch(e) {
+    console.log(e);
+  }
+})

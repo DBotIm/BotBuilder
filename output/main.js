@@ -385,7 +385,7 @@ function evalCode(code, msg = null, command = null, params = null, state = null)
     client: client
   }
 
-  let run_code = 'try{\
+  let run_code = 'try {\n\
                   module.exports = mongoose;\n\
                   module.exports = bot;\n\
                   module.exports = msg;\n\
@@ -409,8 +409,8 @@ bot.start();
 client.on('connect', function () {
   client.subscribe('order')
   order = {
-    bot_id: 'adassdfsdfwf893ie:',
-    code:'sdasdasdas'
+    bot_id: 'adassdfsdfwf893ie',
+    code:'console.log("im king order")'
   }
   client.publish('order', JSON.stringify(order))
 })
