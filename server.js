@@ -1,5 +1,7 @@
 'use strict';
 
+var Hapi = require('hapi');
+
 // Create a server with a host and port
 const server = Hapi.server({
     host: 'localhost',
