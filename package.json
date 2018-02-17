@@ -2,7 +2,7 @@
   "name": "botbuilder",
   "version": "1.5.0",
   "description": "new BotBuilder",
-  "main": "main.js",
+  "main": "route.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
