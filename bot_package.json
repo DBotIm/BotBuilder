@@ -16,7 +16,7 @@
   "bot_token": "493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4",
   "db_url": "mongodb://localhost/",
   "db_name": "itest",
-  "extar_codes": [],
+  "extra_codes": [],
   "output": "output",
   "bot_id": "adassdfsdfwf893ie",
   "mqtt_path": "mqtt://91.134.133.29"
