@@ -9,6 +9,7 @@
   "author": "SKings",
   "license": "ISC",
   "dependencies": {
+    "hapi": "^17.2.0",
     "mongoose": "^5.0.1",
     "mqtt": "^2.15.2",
     "node-eval": "^2.0.0",
