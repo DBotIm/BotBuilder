@@ -3,6 +3,19 @@
 const Hapi = require('hapi');
 var fs = require('fs')
 var Joi = require('joi');
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost/sabb');
+const BotSchema = mongoose.Schema({
+  main: String,
+  bot_token: String,
+  db_url: String,
+  db_name: String,
+  output: String,
+  mqtt_path: String,
+  extra: {},
+}, { strict: false });
+const Bot = mongoose.model('Bot', BotSchema);
 
 // Create a server with a host and port
 const server = Hapi.server({
@@ -23,27 +36,37 @@ server.route({
 var createBot = function (request, h) {
   let configs = request.payload;
 
-  console.log('start reading main.js');
-  let rawdata = fs.readFileSync('main.js', 'utf8');
-  console.log('finish reading main.js');
+  let bot = new Bot(configs);
+  return bot.save()
+  .then(bot => {
+    configs.bot_id = bot._id;
+    console.log('start reading main.js');
+    let rawdata = fs.readFileSync('main.js', 'utf8');
+    console.log('finish reading main.js');
 
-  let keys = Object.keys(configs);
-  for (let i = 0; i < keys.length; i++) {
-    console.log('adding config ' + keys[i]);
-    let temp = '@@'+keys[i]+'@@';
-    let regex = new RegExp(temp, 'g');
-    rawdata = rawdata.replace(regex, "'" + configs[keys[i]] + "'");
-  }
+    let keys = Object.keys(configs);
+    for (let i = 0; i < keys.length; i++) {
+      console.log('adding config ' + keys[i]);
+      let temp = '@@'+keys[i]+'@@';
+      let regex = new RegExp(temp, 'g');
+      rawdata = rawdata.replace(regex, "'" + configs[keys[i]] + "'");
+    }
 
-  if(fs.existsSync(configs.output)) {
-    fs.writeFileSync(configs.output + '/' + configs.main, rawdata, 'utf8')
-  } else {
-    fs.mkdirSync(configs.output)
-    fs.writeFileSync(configs.output + '/' + configs.main, rawdata, 'utf8')
-  }
+    if(fs.existsSync(configs.output)) {
+      fs.writeFileSync(configs.output + '/' + configs.main, rawdata, 'utf8')
+    } else {
+      fs.mkdirSync(configs.output)
+      fs.writeFileSync(configs.output + '/' + configs.main, rawdata, 'utf8')
+    }
 
-  let result = {status: 'Created', code:201, msg: 'Bot Created'}
-  return result;
+    let result = {status: 'Created', code:201, msg: 'Bot Created'}
+    return result;
+  })
+  .catch(err => {
+    let result = {status: 'error', code:400, msg: 'bot save error'}
+    return result;
+  });
+
 }
 
 // Add the route
@@ -59,9 +82,7 @@ server.route({
           db_url: Joi.string().required(),
           db_name: Joi.string().required(),
           output: Joi.string().required(),
-          bot_id: Joi.string().required(),
-          mqtt_path: Joi.string().required(),
-          extra_codes: Joi.string().required()
+          mqtt_path: Joi.string().required()
         },
         options: {
           allowUnknown: true
