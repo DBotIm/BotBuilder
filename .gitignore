@@ -65,3 +65,5 @@ backup_dbs/
 backup_dbs
 
 output/
+
+.idea/

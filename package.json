@@ -1,19 +1,20 @@
 {
   "name": "botbuilder",
   "version": "1.5.0",
-  "description": "new BotBuilder",
-  "main": "server.js",
+  "description": "Bot builder and its manager",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "SKings",
   "license": "ISC",
   "dependencies": {
-    "hapi": "^17.2.0",
+    "bak": "^4.0.1",
     "joi": "^13.1.2",
-    "mongoose": "^5.0.1",
-    "mqtt": "^2.15.2",
+    "mongoose": "^5.0.6",
+    "mqtt": "^2.15.3",
     "node-eval": "^2.0.0",
     "telebot": "^1.2.3"
-  }
+  },
+  "repository": "https://github.com/SamanFekri/ShopBot.git"
 }
