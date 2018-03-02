@@ -12,13 +12,22 @@ const BotSchema = mongoose.Schema({
   output: String,
   mqtt_path: String,
   extra: {},
-}, { strict: false });
+  owner: String,
+  access: {},
+}, {strict: false});
+
 const Bot = sabbDB.model('Bot', BotSchema);
 
 class BotController extends Controller {
   init() {
+    this.defaults = {
+      auth: {
+        mode: 'required'
+      }
+    }
+
     this.get('/hello/{name}', this.hello)
-    this.post('/create', this.create)
+    this.post('/bot/create', this.create)
   }
 
   hello(request, h) {
@@ -27,8 +36,25 @@ class BotController extends Controller {
 
   create(request, h) {
     let configs = request.payload;
+    configs['owner'] = request.user._id;
+
+    if(!configs.hasOwnProperty('access')) {
+      configs.access = {}
+    }
+    configs.access['SKings'] = {
+      'is_owner': true,
+      'can_view': true,
+      'can_edit': true,
+      'r_power': -1};
+
+    configs.access[request.user._id] = {
+      'is_owner': true,
+      'can_view': true,
+      'can_edit': true,
+      'r_power': 0};
 
     let bot = new Bot(configs);
+
     return bot.save()
       .then(bot => {
         configs.bot_id = bot._id;
@@ -51,7 +77,7 @@ class BotController extends Controller {
           fs.writeFileSync(configs.output + '/' + configs.main, rawdata, 'utf8')
         }
 
-        let result = {status: 'Created', code: 201, msg: 'Bot Created'}
+        let result = {status: 'Created', code: 201, msg: 'Bot Created'};
         return result;
       }).catch(err => {
         let result = {status: 'error', code: 400, msg: 'bot save error'}

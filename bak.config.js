@@ -3,7 +3,7 @@ module.exports = {
     './controllers/api'
   ],
 
-  registrations: ['@bakjs/mongo'/*, '@bakjs/auth'*/],
+  registrations: ['@bakjs/mongo', '@bakjs/auth'],
 
   mongo: {
     connections: {
