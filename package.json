@@ -2,18 +2,21 @@
   "name": "botbuilder",
   "version": "1.5.0",
   "description": "Bot builder and its manager",
-  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "bak start",
+    "dev": "nodemon"
   },
   "author": "SKings",
   "license": "ISC",
   "dependencies": {
+    "@bakjs/auth": "^3.1.0",
+    "@bakjs/mongo": "^3.1.0",
     "bak": "^4.0.1",
     "joi": "^13.1.2",
-    "mongoose": "^5.0.6",
+    "mongoose": "^5.0.7",
     "mqtt": "^2.15.3",
     "node-eval": "^2.0.0",
+    "nodemon": "^1.17.1",
     "telebot": "^1.2.3"
   },
   "repository": "https://github.com/SamanFekri/ShopBot.git"

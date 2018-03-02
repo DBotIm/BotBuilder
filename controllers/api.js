@@ -1,9 +1,9 @@
 const {Controller} = require("bak");
-var fs = require('fs')
-var Joi = require('joi');
+let fs = require('fs');
+let Joi = require('joi');
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost/sabb');
+const sabbDB = mongoose.createConnection('mongodb://localhost/sabb');
 const BotSchema = mongoose.Schema({
   main: String,
   bot_token: String,
@@ -13,7 +13,7 @@ const BotSchema = mongoose.Schema({
   mqtt_path: String,
   extra: {},
 }, { strict: false });
-const Bot = mongoose.model('Bot', BotSchema);
+const Bot = sabbDB.model('Bot', BotSchema);
 
 class BotController extends Controller {
   init() {
@@ -21,11 +21,11 @@ class BotController extends Controller {
     this.post('/create', this.create)
   }
 
-  hello(request, reply) {
-    return 'Hello ' + request.params.name
+  hello(request, h) {
+    return 'Hello ' + request.params.name + '!'
   }
 
-  create(request, reply) {
+  create(request, h) {
     let configs = request.payload;
 
     let bot = new Bot(configs);
