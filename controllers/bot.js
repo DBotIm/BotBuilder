@@ -47,10 +47,25 @@ class BotController extends Controller {
       }
     };
     
-    this.post('/get/users/{bot_id}', this.users);
+    this.post('/bot/get/users/{bot_id}', this.get_users);
 
   }
-  async users() {
+  async get_users(request, h) {
+    const bot = await Bot.findById(request.params.bot_id);
+
+    if (bot == null) {
+      let result = {msg: 'Bot not found'};
+      return h.response(result).code(404);
+    }
+
+    const botDB = mongoose.createConnection(bot.db_url + bot.db_name);
+    const User = botDB.model('User', UserSchema);
+
+    let users = await User.find();
+
+    botDB.close();
+
+    return users;
 
   }
 }

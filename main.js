@@ -124,43 +124,48 @@ function state_job(msg, msg_type) {
 
 function update_user(msg) {
   User.findOne({_id: msg.from.id}, function(err, user){
-      try{
-        if(!err) {
-          if(!user) {
-            user = msg.from;
-            user._id = user.id;
-            user.state = 'new';
-            user.role = 'normal';
+    try{
+      if(!err) {
+        if(!user) {
+          user = msg.from;
+          user._id = user.id;
+          user.state = 'new';
+          user.role = 'normal';
 
-            delete user.id;
-          } else {
-            for(let key in msg.from) {
-              if(key != 'id'){
-                user[key] = msg.from[key];
-              }
+          delete user.id;
+        } else {
+          for(let key in msg.from) {
+            if(key != 'id'){
+              user[key] = msg.from[key];
             }
           }
-          if(user.extra == undefined) {
-            user.extra = {photos: {}}
-          }
-          let cur_user = new User(user);
-          cur_user.save().then();
-
-          bot.getUserProfilePhotos(user.id).then(function(res) {
-            if(res.ok) {
-              user.extra.photos = res.result;
-              for(let i = 0; i < user.extra.photos.photos.length; i++){
-                let pic_url = 'https://api.telegram.org/file/bot'
-                + @@bot_token@@
-                + '/' + user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_path;
-                user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].url = pic_url;
-              }
-              let cur_user = new User(user);
-              cur_user.save().then();
-            }
-
-          });
         }
+        if(user.extra == undefined) {
+          user.extra = {photos: {}}
+        }
+        let cur_user = new User(user);
+        cur_user.save().then();
+
+        bot.getUserProfilePhotos(user.id).then(function(res) {
+          if(res.ok) {
+            user.extra.photos = res.result;
+            for(let i = 0; i < user.extra.photos.photos.length; i++){
+              bot.getFile(user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_id).then(
+                file => {
+                  let pic_url = 'https://api.telegram.org/file/bot'
+                    + '493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4'
+                    + '/' + file.file_path;
+                  user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].url = pic_url;
+
+                  let cur_user = new User(user);
+                  cur_user.save().then();
+                }
+              );
+            }
+          }
+
+        });
+      }
     }catch(e) {
       console.log('Adding person:');
       console.log(e);
