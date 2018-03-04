@@ -50,6 +50,11 @@ class BotController extends Controller {
     this.post('/bot/get/users/{bot_id}', this.get_users);
     this.post('/bot/get/messages/{bot_id}', this.get_messages);
 
+    this.post('/bot/message/add/{bot_id}', this.add_message);
+    this.get('/bot/message/get/{bot_id}/{msg_id}', this.get_message);
+    this.get('/bot/message/delete/{bot_id}/{msg_id}', this.delete_message);
+    this.post('/bot/message/update/{bot_id}/{msg_id}', this.update_message);
+
   }
 
   async get_users(request, h) {
@@ -60,24 +65,92 @@ class BotController extends Controller {
       return h.response(result).code(404);
     }
 
-    const botDB = mongoose.createConnection(bot.db_url + bot.db_name);
-    const User = botDB.model('User', UserSchema);
+    if (bot.access[request.user._id].can_view) {
+      const botDB = mongoose.createConnection(bot.db_url + bot.db_name);
+      const User = botDB.model('User', UserSchema);
 
-    let users;
+      let users;
 
-    if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
-      let skip = request.payload.page * request.payload.limit;
-      users = await User.find().skip(skip).limit(parseInt(request.payload.limit));
-    } else {
-      users = await User.find();
+      if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
+        let skip = request.payload.page * request.payload.limit;
+        users = await User.find().skip(skip).limit(parseInt(request.payload.limit));
+      } else {
+        users = await User.find();
+      }
+
+      botDB.close();
+      return h.response(users).code(200);
     }
-
-    botDB.close();
-
-    return h.response(users).code(200);
+    let result = {msg: 'Forbidden'};
+    return h.response(result).code(403);
   }
 
   async get_messages(request, h) {
+    const bot = await Bot.findById(request.params.bot_id);
+
+    if (bot == null) {
+      let result = {msg: 'Bot not found'};
+      return h.response(result).code(404);
+    }
+    if (bot.access[request.user._id].can_view) {
+      const botDB = mongoose.createConnection(bot.db_url + bot.db_name);
+      const Message = botDB.model('Message', MessageSchema);
+
+      let messages;
+
+      if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
+        let skip = request.payload.page * request.payload.limit;
+        messages = await Message.find().skip(skip).limit(parseInt(request.payload.limit));
+      } else {
+        messages = await Message.find();
+      }
+
+      botDB.close();
+
+      return h.response(messages).code(200);
+    }
+    let result = {msg: 'Forbidden'};
+    return h.response(result).code(403);
+  }
+
+  async add_message(request, h) {
+    const bot = await Bot.findById(request.params.bot_id);
+
+    if (bot == null) {
+      let result = {msg: 'Bot not found'};
+      return h.response(result).code(404);
+    }
+
+    let message_params = request.payload;
+    let permit = false;
+
+    if (message_params.event_type === 'eval' && bot.access[request.user._id].can_code) {
+      permit = true;
+    } else if (message_params.event_type !== 'eval' && bot.access[request.user._id].can_edit) {
+      permit = true;
+    }
+
+    if (permit) {
+      const botDB = mongoose.createConnection(bot.db_url + bot.db_name);
+      const Message = botDB.model('Message', MessageSchema);
+
+      let message = new Message(message_params);
+      await message.save();
+
+      botDB.close();
+
+      return h.response(message).code(200);
+    }
+    let result = {msg: 'Forbidden'};
+    return h.response(result).code(403);
+  }
+
+  // todo get message
+  async get_message(request, h) {
+
+  }
+
+  async delete_message(request, h) {
     const bot = await Bot.findById(request.params.bot_id);
 
     if (bot == null) {
@@ -88,24 +161,36 @@ class BotController extends Controller {
     const botDB = mongoose.createConnection(bot.db_url + bot.db_name);
     const Message = botDB.model('Message', MessageSchema);
 
-    let messages;
+    let message = await Message.findById(request.params.msg_id);
+    if (message == null) {
+      let result = {msg: 'Message not found'};
+      return h.response(result).code(404);
+    }
 
-    if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
-      let skip = request.payload.page * request.payload.limit;
-      messages = await Message.find().skip(skip).limit(parseInt(request.payload.limit));
-    } else {
-      messages = await Message.find();
+    let permit = false;
+
+    if (message.event_type === 'eval' && bot.access[request.user._id].can_code) {
+      permit = true;
+    } else if (message.event_type !== 'eval' && bot.access[request.user._id].can_edit) {
+      permit = true;
+    }
+
+    if (permit) {
+      await message.remove();
+      botDB.close();
+      message.msg = 'Message Deleted';
+      return h.response(message).code(200);
     }
 
     botDB.close();
-
-    return h.response(messages).code(200);
+    let result = {msg: 'Forbidden'};
+    return h.response(result).code(403);
   }
 
-  // todo add message
-  // todo get message
-  // todo delete message
   // todo update message
+  async update_message(request, h) {
+
+  }
 }
 
 module.exports = BotController;
