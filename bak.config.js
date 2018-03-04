@@ -1,6 +1,6 @@
 module.exports = {
   routes: [
-    './controllers/api'
+    './controllers/bot_manage'
   ],
 
   registrations: ['@bakjs/mongo', '@bakjs/auth'],
