@@ -6,12 +6,12 @@ const nodeEval = require('node-eval');
 
 // connect to mongodb by mongoose
 const mongoose = require('mongoose');
-var db_url = @@db_url@@ + @@db_name@@;
+let db_url = @@db_url@@ + @@db_name@@;
 mongoose.connect(db_url);
 
 // mqtt
-var mqtt = require('mqtt')
-var client  = mqtt.connect(@@mqtt_path@@)
+let mqtt = require('mqtt');
+let client  = mqtt.connect(@@mqtt_path@@);
 
 const UserSchema = mongoose.Schema({
   _id: String,
@@ -134,7 +134,7 @@ function update_user(msg) {
 
             delete user.id;
           } else {
-            for(var key in msg.from) {
+            for(let key in msg.from) {
               if(key != 'id'){
                 user[key] = msg.from[key];
               }
@@ -149,7 +149,7 @@ function update_user(msg) {
           bot.getUserProfilePhotos(user.id).then(function(res) {
             if(res.ok) {
               user.extra.photos = res.result;
-              for(var i = 0; i < user.extra.photos.photos.length; i++){
+              for(let i = 0; i < user.extra.photos.photos.length; i++){
                 let pic_url = 'https://api.telegram.org/file/bot'
                 + @@bot_token@@
                 + '/' + user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_path;
@@ -194,13 +194,13 @@ function core(msg, state, command = null, params = null, err, result){
         evalCode(result.code, msg, command, params, state)
       }
 
-      var replies = result.replies;
+      let replies = result.replies;
 
       console.log(replies)
 
       if(replies == undefined) return;
 
-      for(var i = 0; i < replies.length; i++) {
+      for(let i = 0; i < replies.length; i++) {
         reply = replies[i];
         switch (reply.type) {
           case "message":
@@ -232,22 +232,22 @@ function core(msg, state, command = null, params = null, err, result){
 
 
 function send_text_message(msg, reply){
-  var inline_keyboard = reply.inline_keyboard;
+  let inline_keyboard = reply.inline_keyboard;
   if(inline_keyboard != null) {
-    var keyboard_tmp = [];
+    let keyboard_tmp = [];
 
-    for(var j = 0; j < inline_keyboard.length; j++) {
-      var row_tmp = [];
+    for(let j = 0; j < inline_keyboard.length; j++) {
+      let row_tmp = [];
 
-      var row = inline_keyboard[j];
-      for(var k = 0; k < row.length; k++) {
-        var button = row[k]
+      let row = inline_keyboard[j];
+      for(let k = 0; k < row.length; k++) {
+        let button = row[k]
         row_tmp.push(bot.inlineButton(button.text, button.action))
       }
       keyboard_tmp.push(row_tmp)
     }
 
-    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    let replyMarkup = bot.inlineKeyboard(keyboard_tmp)
     bot.sendMessage(msg.from.id, reply.text, {replyMarkup})
   } else {
     bot.sendMessage(msg.from.id, reply.text)
@@ -255,23 +255,23 @@ function send_text_message(msg, reply){
 }
 
 function send_photo_message(msg, reply){
-  var inline_keyboard = reply.inline_keyboard;
+  let inline_keyboard = reply.inline_keyboard;
   if(inline_keyboard != null) {
-    var keyboard_tmp = [];
+    let keyboard_tmp = [];
 
-    for(var j = 0; j < inline_keyboard.length; j++) {
-      var row_tmp = [];
+    for(let j = 0; j < inline_keyboard.length; j++) {
+      let row_tmp = [];
 
-      var row = inline_keyboard[j];
-      for(var k = 0; k < row.length; k++) {
-        var button = row[k]
+      let row = inline_keyboard[j];
+      for(let k = 0; k < row.length; k++) {
+        let button = row[k]
         row_tmp.push(bot.inlineButton(button.text, button.action))
       }
       keyboard_tmp.push(row_tmp)
     }
 
-    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
-    var caption = reply.caption
+    let replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    let caption = reply.caption
     bot.sendPhoto(msg.from.id, reply.path, {caption: reply.caption, replyMarkup: replyMarkup})
   } else {
     bot.sendPhoto(msg.from.id, reply.path, {caption: reply.caption})
@@ -279,23 +279,23 @@ function send_photo_message(msg, reply){
 }
 
 function send_audio_message(msg, reply){
-  var inline_keyboard = reply.inline_keyboard;
+  let inline_keyboard = reply.inline_keyboard;
   if(inline_keyboard != null) {
-    var keyboard_tmp = [];
+    let keyboard_tmp = [];
 
-    for(var j = 0; j < inline_keyboard.length; j++) {
-      var row_tmp = [];
+    for(let j = 0; j < inline_keyboard.length; j++) {
+      let row_tmp = [];
 
-      var row = inline_keyboard[j];
-      for(var k = 0; k < row.length; k++) {
-        var button = row[k]
+      let row = inline_keyboard[j];
+      for(let k = 0; k < row.length; k++) {
+        let button = row[k]
         row_tmp.push(bot.inlineButton(button.text, button.action))
       }
       keyboard_tmp.push(row_tmp)
     }
 
-    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
-    var caption = reply.caption
+    let replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    let caption = reply.caption
     bot.sendAudio(msg.from.id, reply.path, {caption: reply.caption, replyMarkup: replyMarkup})
   } else {
     bot.sendAudio(msg.from.id, reply.path, {caption: reply.caption})
@@ -303,23 +303,23 @@ function send_audio_message(msg, reply){
 }
 
 function send_document_message(msg, reply){
-  var inline_keyboard = reply.inline_keyboard;
+  let inline_keyboard = reply.inline_keyboard;
   if(inline_keyboard != null) {
-    var keyboard_tmp = [];
+    let keyboard_tmp = [];
 
-    for(var j = 0; j < inline_keyboard.length; j++) {
-      var row_tmp = [];
+    for(let j = 0; j < inline_keyboard.length; j++) {
+      let row_tmp = [];
 
-      var row = inline_keyboard[j];
-      for(var k = 0; k < row.length; k++) {
-        var button = row[k]
+      let row = inline_keyboard[j];
+      for(let k = 0; k < row.length; k++) {
+        let button = row[k]
         row_tmp.push(bot.inlineButton(button.text, button.action))
       }
       keyboard_tmp.push(row_tmp)
     }
 
-    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
-    var caption = reply.caption
+    let replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    let caption = reply.caption
     bot.sendDocument(msg.from.id, reply.path, {caption: reply.caption, replyMarkup: replyMarkup})
   } else {
     bot.sendDocument(msg.from.id, reply.path, {caption: reply.caption})
@@ -327,23 +327,23 @@ function send_document_message(msg, reply){
 }
 
 function send_video_message(msg, reply){
-  var inline_keyboard = reply.inline_keyboard;
+  let inline_keyboard = reply.inline_keyboard;
   if(inline_keyboard != null) {
-    var keyboard_tmp = [];
+    let keyboard_tmp = [];
 
-    for(var j = 0; j < inline_keyboard.length; j++) {
-      var row_tmp = [];
+    for(let j = 0; j < inline_keyboard.length; j++) {
+      let row_tmp = [];
 
-      var row = inline_keyboard[j];
-      for(var k = 0; k < row.length; k++) {
-        var button = row[k]
+      let row = inline_keyboard[j];
+      for(let k = 0; k < row.length; k++) {
+        let button = row[k]
         row_tmp.push(bot.inlineButton(button.text, button.action))
       }
       keyboard_tmp.push(row_tmp)
     }
 
-    var replyMarkup = bot.inlineKeyboard(keyboard_tmp)
-    var caption = reply.caption
+    let replyMarkup = bot.inlineKeyboard(keyboard_tmp)
+    let caption = reply.caption
     bot.sendVideo(msg.from.id, reply.path, {caption: reply.caption, replyMarkup: replyMarkup})
   } else {
     bot.sendVideo(msg.from.id, reply.path, {caption: reply.caption})

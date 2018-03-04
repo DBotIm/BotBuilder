@@ -79,12 +79,6 @@ class BotManageController extends Controller {
           let regex = new RegExp(temp, 'g');
           rawdata = rawdata.replace(regex, "'" + value + "'");
         });
-        // for (let i = 0; i < keys.length; i++) {
-        //   console.log('adding config ' + keys[i]);
-        //   let temp = '@@' + keys[i] + '@@';
-        //   let regex = new RegExp(temp, 'g');
-        //   rawdata = rawdata.replace(regex, "'" + configs[keys[i]] + "'");
-        // }
 
         if (fs.existsSync(configs.output)) {
           fs.writeFileSync(configs.output + '/' + configs.main, rawdata, 'utf8')
@@ -99,7 +93,13 @@ class BotManageController extends Controller {
         let result = {msg: 'bot save error'};
         console.log(err);
         bot.remove();
-        return h.response(res).code(400);
+
+        let path = configs.output + '/' + configs.main;
+        if(fs.existsSync(path)){
+          fs.unlinkSync(path);
+        }
+
+        return h.response(result).code(400);
       })
   }
 
@@ -109,6 +109,11 @@ class BotManageController extends Controller {
     if (bot == null) {
       let result = {msg: 'Bot not found'};
       return h.response(result).code(404);
+    }
+
+    let path = bot.output + '/' + bot.main;
+    if(fs.existsSync(path)){
+      fs.unlinkSync(path);
     }
 
     if (bot.access.hasOwnProperty(request.user._id)) {
@@ -132,7 +137,7 @@ class BotManageController extends Controller {
     }
 
     if (bot.access.hasOwnProperty(request.user._id)) {
-      if (bot.access[request.user._id].can_code) {
+      if (bot.access[request.user._id].can_view) {
         return h.response(bot).code(200);
       }
     }
