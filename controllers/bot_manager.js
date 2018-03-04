@@ -26,14 +26,9 @@ class BotManageController extends Controller {
       }
     };
 
-    this.get('/hello/{name}', this.hello);
     this.post('/bot/create', this.create);
     this.get('/bot/delete/{bot_id}', this.delete);
     this.get('/bot/{bot_id}', this.read);
-  }
-
-  hello(request, h) {
-    return 'Hello ' + request.params.name + '!'
   }
 
   create(request, h) {
@@ -145,6 +140,10 @@ class BotManageController extends Controller {
     let result = {msg: 'Forbidden'};
     return h.response(result).code(403);
   }
+
+  // todo share access
+  // todo update access
+  // todo revoke access
 }
 
 module.exports = BotManageController;
