@@ -48,6 +48,7 @@ class BotController extends Controller {
     };
 
     this.post('/bot/get/users/{bot_id}', this.get_users);
+    this.post('/bot/get/messages/{bot_id}', this.get_messages);
 
   }
 
@@ -75,6 +76,36 @@ class BotController extends Controller {
 
     return h.response(users).code(200);
   }
+
+  async get_messages(request, h) {
+    const bot = await Bot.findById(request.params.bot_id);
+
+    if (bot == null) {
+      let result = {msg: 'Bot not found'};
+      return h.response(result).code(404);
+    }
+
+    const botDB = mongoose.createConnection(bot.db_url + bot.db_name);
+    const Message = botDB.model('Message', MessageSchema);
+
+    let messages;
+
+    if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
+      let skip = request.payload.page * request.payload.limit;
+      messages = await Message.find().skip(skip).limit(parseInt(request.payload.limit));
+    } else {
+      messages = await Message.find();
+    }
+
+    botDB.close();
+
+    return h.response(messages).code(200);
+  }
+
+  // todo add message
+  // todo get message
+  // todo delete message
+  // todo update message
 }
 
 module.exports = BotController;
