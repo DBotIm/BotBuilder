@@ -28,7 +28,7 @@ const UserSchema = mongoose.Schema({
   is_bot: Boolean,
   language_code: String,
   extra: {},
-}, { strict: false });
+}, {strict: false});
 
 
 const MessageSchema = mongoose.Schema({
@@ -37,7 +37,7 @@ const MessageSchema = mongoose.Schema({
   replies: Array,
   code: String,
   trigger_state: String,
-}, { strict: false });
+}, {strict: false});
 
 class BotController extends Controller {
   init() {
@@ -46,10 +46,11 @@ class BotController extends Controller {
         mode: 'required'
       }
     };
-    
+
     this.post('/bot/get/users/{bot_id}', this.get_users);
 
   }
+
   async get_users(request, h) {
     const bot = await Bot.findById(request.params.bot_id);
 
@@ -61,12 +62,18 @@ class BotController extends Controller {
     const botDB = mongoose.createConnection(bot.db_url + bot.db_name);
     const User = botDB.model('User', UserSchema);
 
-    let users = await User.find();
+    let users;
+
+    if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
+      let skip = request.payload.page * request.payload.limit;
+      users = await User.find().skip(skip).limit(parseInt(request.payload.limit));
+    } else {
+      users = await User.find();
+    }
 
     botDB.close();
 
-    return users;
-
+    return h.response(users).code(200);
   }
 }
 
