@@ -145,9 +145,39 @@ class BotController extends Controller {
     return h.response(result).code(403);
   }
 
-  // todo get message
   async get_message(request, h) {
+    const bot = await Bot.findById(request.params.bot_id);
 
+    if (bot == null) {
+      let result = {msg: 'Bot not found'};
+      return h.response(result).code(404);
+    }
+
+    const botDB = mongoose.createConnection(bot.db_url + bot.db_name);
+    const Message = botDB.model('Message', MessageSchema);
+
+    let message = await Message.findById(request.params.msg_id);
+    if (message == null) {
+      let result = {msg: 'Message not found'};
+      return h.response(result).code(404);
+    }
+
+    let permit = false;
+
+    if (message.event_type === 'eval' && bot.access[request.user._id].can_code) {
+      permit = true;
+    } else if (message.event_type !== 'eval' && bot.access[request.user._id].can_view) {
+      permit = true;
+    }
+
+    if (permit) {
+      botDB.close();
+      return h.response(message).code(200);
+    }
+
+    botDB.close();
+    let result = {msg: 'Forbidden'};
+    return h.response(result).code(403);
   }
 
   async delete_message(request, h) {
