@@ -27,6 +27,7 @@ class BotManageController extends Controller {
     };
 
     this.post('/bot/create', this.create);
+    this.post('/bot/get/bots', this.get_bots);
     this.get('/bot/delete/{bot_id}', this.delete);
     this.get('/bot/{bot_id}', this.read);
   }
@@ -141,6 +142,16 @@ class BotManageController extends Controller {
     return h.response(result).code(403);
   }
 
+  async get_bots(request, h) {
+    let bots;
+    if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
+      let skip = request.payload.page * request.payload.limit;
+      bots = await Bot.find().skip(skip).limit(parseInt(request.payload.limit));
+    } else {
+      bots = await Bot.find();
+    }
+    return h.response(bots).code(200);
+  }
   // todo share access
   // todo update access
   // todo revoke access
