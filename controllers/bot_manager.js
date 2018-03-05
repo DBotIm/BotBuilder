@@ -45,6 +45,7 @@ class BotManageController extends Controller {
       'can_edit': true,
       'can_delete': true,
       'can_code': true,
+      'can_manage' : true,
       'r_power': -1
     };
 
@@ -54,6 +55,7 @@ class BotManageController extends Controller {
       'can_edit': true,
       'can_delete': true,
       'can_code': true,
+      'can_manage' : true,
       'r_power': 0
     };
 
@@ -144,7 +146,7 @@ class BotManageController extends Controller {
 
   async get_bots(request, h) {
     let bots;
-    let query = {}
+    let query = {};
     query['access.' + request.user._id + '.can_view'] = true;
     if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
       let skip = request.payload.page * request.payload.limit;
@@ -163,7 +165,8 @@ class BotManageController extends Controller {
     return h.response(bots).code(200);
   }
 
-  // todo share access
+  // todo add access
+  // todo see who have access
   // todo update access
   // todo revoke access
 }
