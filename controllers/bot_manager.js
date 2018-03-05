@@ -148,10 +148,17 @@ class BotManageController extends Controller {
     query['access.' + request.user._id + '.can_view'] = true;
     if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
       let skip = request.payload.page * request.payload.limit;
-
-      bots = await Bot.find(query).skip(skip).limit(parseInt(request.payload.limit));
+      if(request.user.r_power >= 0) {
+        bots = await Bot.find(query).skip(skip).limit(parseInt(request.payload.limit));
+      } else {
+        bots = await Bot.find().skip(skip).limit(parseInt(request.payload.limit));
+      }
     } else {
-      bots = await Bot.find(query);
+      if(request.user.r_power >= 0) {
+        bots = await Bot.find(query);
+      } else {
+        bots = await Bot.find();
+      }
     }
     return h.response(bots).code(200);
   }
