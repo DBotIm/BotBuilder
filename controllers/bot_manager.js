@@ -91,7 +91,7 @@ class BotManageController extends Controller {
         bot.remove();
 
         let path = configs.output + '/' + configs.main;
-        if(fs.existsSync(path)){
+        if (fs.existsSync(path)) {
           fs.unlinkSync(path);
         }
 
@@ -108,7 +108,7 @@ class BotManageController extends Controller {
     }
 
     let path = bot.output + '/' + bot.main;
-    if(fs.existsSync(path)){
+    if (fs.existsSync(path)) {
       fs.unlinkSync(path);
     }
 
@@ -144,14 +144,18 @@ class BotManageController extends Controller {
 
   async get_bots(request, h) {
     let bots;
+    let query = {}
+    query['access.' + request.user._id + '.can_view'] = true;
     if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
       let skip = request.payload.page * request.payload.limit;
-      bots = await Bot.find().skip(skip).limit(parseInt(request.payload.limit));
+
+      bots = await Bot.find(query).skip(skip).limit(parseInt(request.payload.limit));
     } else {
-      bots = await Bot.find();
+      bots = await Bot.find(query);
     }
     return h.response(bots).code(200);
   }
+
   // todo share access
   // todo update access
   // todo revoke access
