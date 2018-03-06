@@ -30,6 +30,7 @@ class BotManageController extends Controller {
     this.post('/bot/get/bots', this.get_bots);
     this.get('/bot/delete/{bot_id}', this.delete);
     this.get('/bot/{bot_id}', this.read);
+    this.post('/bot/share/{bot_id}/{user_id}', this.share_bot);
   }
 
   create(request, h) {
@@ -165,7 +166,41 @@ class BotManageController extends Controller {
     return h.response(bots).code(200);
   }
 
-  // todo add access
+  async share_bot(request, h) {
+    let bot = await Bot.findById(request.params.bot_id);
+
+    if (bot == null) {
+      let result = {msg: 'Bot not found'};
+      return h.response(result).code(404);
+    }
+
+    let user = await sabbDB.model('User').findById(request.params.user_id);
+
+    if (user == null) {
+      let result = {msg: 'User not found'};
+      return h.response(result).code(404);
+    }
+
+    if (bot.access.hasOwnProperty(request.user._id)) {
+      if (bot.access[request.user._id].can_share) {
+        if(!bot.access.hasOwnProperty(request.params.user_id)) {
+          let acc = request.payload;
+          acc.is_owner = false;
+          acc.r_power = bot.access[request.user._id].r_power + 1;
+          bot.access[request.params.user_id] = acc;
+          await Bot.findByIdAndUpdate(request.params.bot_id, bot, {upsert: true});
+          return h.response(acc).code(200);
+        } else {
+          let result = {msg: 'Already exist'};
+          return h.response(result).code(409);
+        }
+      }
+    }
+
+
+    let result = {msg: 'Forbidden'};
+    return h.response(result).code(403);
+  }
   // todo see who have access
   // todo update access
   // todo revoke access
