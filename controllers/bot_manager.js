@@ -45,7 +45,7 @@ class BotManageController extends Controller {
       'can_edit': true,
       'can_delete': true,
       'can_code': true,
-      'can_manage' : true,
+      'can_share' : true,
       'r_power': -1
     };
 
@@ -55,7 +55,7 @@ class BotManageController extends Controller {
       'can_edit': true,
       'can_delete': true,
       'can_code': true,
-      'can_manage' : true,
+      'can_share' : true,
       'r_power': 0
     };
 
