@@ -1,10 +1,11 @@
 module.exports = {
   routes: [
     './controllers/bot_manager',
-    './controllers/bot'
+    './controllers/bot',
+    './controllers/ui'
   ],
 
-  registrations: ['@bakjs/mongo', '@bakjs/auth'],
+  registrations: ['@bakjs/mongo', '@bakjs/auth', 'inert'],
 
   mongo: {
     connections: {
