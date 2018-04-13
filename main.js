@@ -400,7 +400,9 @@ bot.on('callbackQuery', msg => {
   } else {
     command_core(msg, parts[0]);
   }
-  // core(msg, msg.data)
+  bot.answerCallbackQuery(msg.id,{}).catch((err) => {
+    console.log(err);
+  });
 })
 
 function evalCode(code, msg = null, command = null, params = null, state = null) {
