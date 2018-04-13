@@ -54,7 +54,7 @@ bot.on('text', (msg) => {
     }
 
     parts = msg.text.split(delimiter);
-    console.log(parts)
+    console.log(parts);
 
     if(parts.length > 1) {
       command_core(msg, parts[0], parts.slice(1));
@@ -141,32 +141,59 @@ function update_user(msg) {
           }
         }
         if(user.extra == undefined) {
-          user.extra = {photos: {}}
+          user.extra = {photos: {total_count:0}}
         }
         let cur_user = new User(user);
         cur_user.save().then();
 
-        bot.getUserProfilePhotos(user.id).then(async function(res) {
-          if(res.ok) {
-            user.extra.photos = res.result;
-            for(let i = 0; i < user.extra.photos.photos.length; i++){
-              await bot.getFile(user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_id).then(
-                file => {
-                  user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].url = file.fileLink;
-                  let cur_user = new User(user);
-                  cur_user.save().then();
-                }
-              );
-            }
-          }
-
-        });
+        // bot.getUserProfilePhotos(user.id).then(async function(res) {
+        //   if(res.ok) {
+        //     user.extra.photos = res.result;
+        //     for(let i = 0; i < user.extra.photos.photos.length; i++){
+        //       await bot.getFile(user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_id).then(
+        //         file => {
+        //           user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].url = file.fileLink;
+        //           let cur_user = new User(user);
+        //           cur_user.save().then();
+        //         }
+        //       );
+        //     }
+        //   }
+        // });
+        update_photos(user);
       }
     }catch(e) {
       console.log('Adding person:');
       console.log(e);
     }
   });
+}
+
+function update_photos(user) {
+  try {
+    if(user.extra == undefined) {
+      user.extra = {photos: {total_count: 0}}
+    }
+    bot.getUserProfilePhotos(user.id).then(async function (res) {
+      if (res.ok) {
+        if (user.extra.photos.total_count != res.result.total_count) {
+          user.extra.photos = res.result;
+          for (let i = 0; i < user.extra.photos.photos.length; i++) {
+            await bot.getFile(user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_id).then(
+              file => {
+                user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].url = file.fileLink;
+                let cur_user = new User(user);
+                cur_user.save().then();
+              }
+            );
+          }
+        }
+      }
+    });
+  } catch (e) {
+    console.log("update photos");
+    console.log(e);
+  }
 }
 
 function command_core(msg, command, params = null) {
@@ -186,6 +213,10 @@ function core(msg, state, command = null, params = null, err, result){
     if(!err) {
       if(result == null) return;
 
+      User.findOne({_id: msg.from.id}, function(err, user){
+        update_photos(user);
+      });
+
       console.log('params');
       console.log(params);
       console.log();
@@ -197,7 +228,7 @@ function core(msg, state, command = null, params = null, err, result){
 
       let replies = result.replies;
 
-      console.log(replies)
+      console.log(replies);
 
       if(replies == undefined) return;
 
