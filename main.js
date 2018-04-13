@@ -146,17 +146,13 @@ function update_user(msg) {
         let cur_user = new User(user);
         cur_user.save().then();
 
-        bot.getUserProfilePhotos(user.id).then(function(res) {
+        bot.getUserProfilePhotos(user.id).then(async function(res) {
           if(res.ok) {
             user.extra.photos = res.result;
             for(let i = 0; i < user.extra.photos.photos.length; i++){
-              bot.getFile(user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_id).then(
+              await bot.getFile(user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].file_id).then(
                 file => {
-                  let pic_url = 'https://api.telegram.org/file/bot'
-                    + '493487795:AAF656HZVxMLepE3Te3gAyGdiCzQ3PwqHv4'
-                    + '/' + file.file_path;
-                  user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].url = pic_url;
-
+                  user.extra.photos.photos[i][user.extra.photos.photos[i].length - 1].url = file.fileLink;
                   let cur_user = new User(user);
                   cur_user.save().then();
                 }
