@@ -439,6 +439,11 @@ function evalCode(code, msg = null, command = null, params = null, state = null)
 
 bot.start();
 
+client.on('connect', function () {
+  client.subscribe('SKings_order')
+  client.subscribe('order')
+});
+
 client.on('message', function (topic, message) {
   try{
     console.log('mqtt topic')
