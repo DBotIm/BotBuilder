@@ -61,9 +61,8 @@ bot.on('text', (msg) => {
     } else {
       command_core(msg, parts[0]);
     }
-  } else {
-    state_job(msg, 'text')
   }
+  state_job(msg, 'text')
 });
 
 bot.on('photo', (msg) => {
