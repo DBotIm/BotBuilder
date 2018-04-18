@@ -449,8 +449,8 @@ client.on('message', function (topic, message) {
     console.log('mqtt topic')
     console.log(topic)
     // message is Buffer
+    message = JSON.parse(message);
     if(topic == 'order') {
-      message = JSON.parse(message);
       if(message.bot_id == @@bot_id@@){
         evalCode(message.code);
       }
