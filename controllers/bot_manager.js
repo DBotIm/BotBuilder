@@ -105,7 +105,6 @@ class BotManageController extends Controller {
   }
 
   async build(request, h) {
-    console.log('here')
     let bot = await Bot.findById(request.params.bot_id);
 
     let configs = {};
@@ -118,7 +117,6 @@ class BotManageController extends Controller {
       return h.response(result).code(404);
     }
 
-    console.log(bot);
     if (bot.access.hasOwnProperty(request.user._id)) {
       if (bot.access[request.user._id].can_edit) {
         let path = bot.output + '/' + bot.main;
@@ -145,7 +143,7 @@ class BotManageController extends Controller {
         let rawdata = fs.readFileSync('main.js', 'utf8');
         console.log('finish reading main.js');
 
-        let keys = Object.keys(bot);
+        let keys = Object.keys(bot._doc);
 
         keys.forEach(key => {
           const value = bot[key];
@@ -154,6 +152,7 @@ class BotManageController extends Controller {
           let regex = new RegExp(temp, 'g');
           rawdata = rawdata.replace(regex, "'" + value + "'");
         });
+
 
         if (fs.existsSync(bot.output)) {
           fs.writeFileSync(bot.output + '/' + bot.main, rawdata, 'utf8')
