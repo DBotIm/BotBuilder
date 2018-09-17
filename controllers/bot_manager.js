@@ -139,7 +139,7 @@ class BotManageController extends Controller {
 
     return bot.save()
       .then(bot => {
-        bot['bot_id'] = bot._id;
+        bot._doc.bot_id = bot._id;
         console.log('start reading main.js');
         let rawdata = fs.readFileSync('main.js', 'utf8');
         console.log('finish reading main.js');
