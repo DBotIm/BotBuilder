@@ -27,6 +27,7 @@ class BotManageController extends Controller {
     };
 
     this.post('/bot/create', this.create);
+    this.post('/bot/build/{bot_id}', this.build);
     this.post('/bot/get/bots', this.get_bots);
     this.get('/bot/delete/{bot_id}', this.delete);
     this.get('/bot/{bot_id}', this.read);
@@ -47,7 +48,7 @@ class BotManageController extends Controller {
       'can_edit': true,
       'can_delete': true,
       'can_code': true,
-      'can_share' : true,
+      'can_share': true,
       'r_power': -1
     };
 
@@ -57,7 +58,7 @@ class BotManageController extends Controller {
       'can_edit': true,
       'can_delete': true,
       'can_code': true,
-      'can_share' : true,
+      'can_share': true,
       'r_power': 0
     };
 
@@ -95,6 +96,80 @@ class BotManageController extends Controller {
         bot.remove();
 
         let path = configs.output + '/' + configs.main;
+        if (fs.existsSync(path)) {
+          fs.unlinkSync(path);
+        }
+
+        return h.response(result).code(400);
+      })
+  }
+
+  async build(request, h) {
+    console.log('here')
+    let bot = await Bot.findById(request.params.bot_id);
+
+    let configs = {};
+    if(request.payload !== null) {
+      configs = request.payload;
+    }
+
+    if (bot == null) {
+      let result = {msg: 'Bot not found'};
+      return h.response(result).code(404);
+    }
+
+    console.log(bot);
+    if (bot.access.hasOwnProperty(request.user._id)) {
+      if (bot.access[request.user._id].can_edit) {
+        let path = bot.output + '/' + bot.main;
+        if (fs.existsSync(path)) {
+          fs.unlinkSync(path);
+        }
+      } else {
+        let result = {msg: 'Forbidden'};
+        return h.response(result).code(403);
+      }
+    }
+
+
+    let keys = Object.keys(configs);
+    keys.forEach(key => {
+      if (key !== '_id' && key !== 'owner' && key !== 'access') {
+        bot[key] = configs[key];
+      }
+    });
+
+    return bot.save()
+      .then(bot => {
+        console.log('start reading main.js');
+        let rawdata = fs.readFileSync('main.js', 'utf8');
+        console.log('finish reading main.js');
+
+        let keys = Object.keys(bot);
+
+        keys.forEach(key => {
+          const value = bot[key];
+          console.log('adding config ' + key);
+          let temp = '@@' + key + '@@';
+          let regex = new RegExp(temp, 'g');
+          rawdata = rawdata.replace(regex, "'" + value + "'");
+        });
+
+        if (fs.existsSync(bot.output)) {
+          fs.writeFileSync(bot.output + '/' + bot.main, rawdata, 'utf8')
+        } else {
+          fs.mkdirSync(bot.output);
+          fs.writeFileSync(bot.output + '/' + bot.main, rawdata, 'utf8')
+        }
+
+        let result = {msg: 'Bot Build', bot_id: bot._id};
+        return h.response(result).code(200);
+      }).catch(err => {
+        let result = {msg: 'bot save error'};
+        console.log(err);
+        bot.remove();
+
+        let path = bot.output + '/' + bot.main;
         if (fs.existsSync(path)) {
           fs.unlinkSync(path);
         }
@@ -152,13 +227,13 @@ class BotManageController extends Controller {
     query['access.' + request.user._id + '.can_view'] = true;
     if (request.payload.hasOwnProperty('page') && request.payload.hasOwnProperty('limit')) {
       let skip = request.payload.page * request.payload.limit;
-      if(request.user.r_power >= 0) {
+      if (request.user.r_power >= 0) {
         bots = await Bot.find(query).skip(skip).limit(parseInt(request.payload.limit));
       } else {
         bots = await Bot.find().skip(skip).limit(parseInt(request.payload.limit));
       }
     } else {
-      if(request.user.r_power >= 0) {
+      if (request.user.r_power >= 0) {
         bots = await Bot.find(query);
       } else {
         bots = await Bot.find();
@@ -184,7 +259,7 @@ class BotManageController extends Controller {
 
     if (bot.access.hasOwnProperty(request.user._id)) {
       if (bot.access[request.user._id].can_share) {
-        if(!bot.access.hasOwnProperty(request.params.user_id)) {
+        if (!bot.access.hasOwnProperty(request.params.user_id)) {
           let acc = request.payload;
           acc.is_owner = false;
           acc.r_power = bot.access[request.user._id].r_power + 1;
@@ -222,9 +297,9 @@ class BotManageController extends Controller {
 
     if (bot.access.hasOwnProperty(request.user._id)) {
       if (bot.access[request.user._id].can_share) {
-        if(bot.access.hasOwnProperty(request.params.user_id)) {
+        if (bot.access.hasOwnProperty(request.params.user_id)) {
 
-          if(bot.access[request.user._id].r_power < bot.access[request.params.user_id].r_power) {
+          if (bot.access[request.user._id].r_power < bot.access[request.params.user_id].r_power) {
             delete bot.access[request.params.user_id];
             await Bot.findByIdAndUpdate(request.params.bot_id, bot, {upsert: true});
             let result = {msg: 'Access revoke'};
