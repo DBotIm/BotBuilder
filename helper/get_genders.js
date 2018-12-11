@@ -24,9 +24,10 @@ User.find(
     "first_name": {"$exists": true},
     "extra.gender": {"$exists": false}
   },
-  function (err, users) {
+  async function (err, users) {
     let n = 0;
     for (let i in users) {
+      await sleep(100);
       axios.get(`https://gender-api.com/get?name=${encodeURI(users[i].first_name)}&key=${config.gender.apiKey}`)
         .then(function(response){
           User.findOne({'_id': users[i]._id}, function (err, data) {
@@ -53,3 +54,9 @@ User.find(
       mongoose.disconnect();
   }
 );
+
+function sleep(ms){
+  return new Promise(resolve=>{
+    setTimeout(resolve,ms)
+  })
+}
