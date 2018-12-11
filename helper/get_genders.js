@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const axios = require('axios');
-const config = require('/config');
+const config = require('../config');
 
 let dbName = 'pozhi_shop';
 let db_url = 'mongodb://localhost/' + dbName;
