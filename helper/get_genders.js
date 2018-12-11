@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const axios = require('axios');
 const config = require('../config');
 
-let dbName = 'pozhi_shop';
+let dbName = config.db;
 let db_url = 'mongodb://localhost/' + dbName;
 mongoose.connect(db_url);
 const UserSchema = mongoose.Schema({
