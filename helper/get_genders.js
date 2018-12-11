@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const axios = require('axios');
+const config = require('/config');
 
 let dbName = 'pozhi_shop';
 let db_url = 'mongodb://localhost/' + dbName;
@@ -26,7 +27,7 @@ User.find(
   function (err, users) {
     let n = 0;
     for (let i in users) {
-      axios.get(`https://gender-api.com/get?name=${encodeURI(users[i].first_name)}&key=sjaruXnWkYPWBRrWNQ`)
+      axios.get(`https://gender-api.com/get?name=${encodeURI(users[i].first_name)}&key=${config.gender.apiKey}`)
         .then(function(response){
           User.findOne({'_id': users[i]._id}, function (err, data) {
             if('extra' in data) {
