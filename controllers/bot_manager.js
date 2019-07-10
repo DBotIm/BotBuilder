@@ -76,7 +76,7 @@ class BotManageController extends Controller {
         keys.forEach(key => {
           const value = configs[key];
           console.log('adding config ' + key);
-          let temp = '@@' + key + '@@';
+          let temp = '{{' + key + '}}';
           let regex = new RegExp(temp, 'g');
           rawdata = rawdata.replace(regex, "'" + value + "'");
         });
@@ -149,7 +149,7 @@ class BotManageController extends Controller {
         keys.forEach(key => {
           const value = bot[key];
           console.log('adding config ' + key);
-          let temp = '@@' + key + '@@';
+          let temp = '{{' + key + '}}';
           let regex = new RegExp(temp, 'g');
           rawdata = rawdata.replace(regex, "'" + value + "'");
         });

@@ -1,17 +1,17 @@
 const TeleBot = require('telebot');
-const bot = new TeleBot(@@bot_token@@);
+const bot = new TeleBot({{bot_token}});
 
 // node eval
 const nodeEval = require('node-eval');
 
 // connect to mongodb by mongoose
 const mongoose = require('mongoose');
-let db_url = @@db_url@@ + @@db_name@@;
+let db_url = {{db_url}} + {{db_name}};
 mongoose.connect(db_url);
 
 // mqtt
 let mqtt = require('mqtt');
-let client  = mqtt.connect(@@mqtt_path@@);
+let client  = mqtt.connect({{mqtt_path}});
 
 const UserSchema = mongoose.Schema({
   _id: String,
@@ -450,7 +450,7 @@ client.on('message', function (topic, message) {
     // message is Buffer
     message = JSON.parse(message);
     if(topic == 'order') {
-      if(message.bot_id == @@bot_id@@){
+      if(message.bot_id == {{bot_id}}){
         evalCode(message.code);
       }
     } else if(topic == 'SKings_order'){
