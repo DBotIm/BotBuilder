@@ -11,7 +11,7 @@
   "dependencies": {
     "@bakjs/auth": "^3.1.0",
     "@bakjs/mongo": "^3.1.0",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "bak": "^4.0.1",
     "inert": "^5.1.0",
     "joi": "^13.1.2",
